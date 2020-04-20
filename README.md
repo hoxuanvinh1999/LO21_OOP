@@ -2,6 +2,6 @@
 |----------| 
 |GABET Joseph|
 |Killian balland|
-|Martin Boyer|
+|Alix de Cremoux|
 |Xuân-vinh Ho|
 |Zhuofan Xu|
