@@ -1,11 +1,9 @@
 #include "VisualiseurForm.h"
 #include "ui_VisualiseurForm.h"
-#include "core/ComptabiliteManager.h"
 
-VisualiseurForm::VisualiseurForm(QWidget *parent): QWidget(parent), ui(new Ui::VisualiseurForm) {
+VisualiseurForm::VisualiseurForm(QWidget *parent): QWidget(parent), ui(new Ui::VisualiseurForm), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     ui->treeWidget->setHeaderLabel("Comptes");
-    ComptabiliteManager& manager = ComptabiliteManager::getInstance();
     connect(&manager, SIGNAL(comptesModifies()), this, SLOT(afficherArbre()));
     afficherArbre();
 }
@@ -16,7 +14,6 @@ VisualiseurForm::~VisualiseurForm() {
 
 void VisualiseurForm::afficherArbre() {
     ui->treeWidget->clear();
-    ComptabiliteManager& manager = ComptabiliteManager::getInstance();
     ajouterCompteRacine(manager.getCompteRacine());
 }
 

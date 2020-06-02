@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QTreeWidgetItem>
+#include "core/ComptabiliteManager.h"
+#include "core/CompteRacine.h"
 #include "core/CompteAbstrait.h"
 
 namespace Ui {
@@ -21,6 +23,7 @@ public slots:
 
 private:
     Ui::VisualiseurForm *ui;
+    ComptabiliteManager& manager;
     void ajouterCompteRacine(const CompteRacine& compte);
     void ajouterCompteEnfant(const CompteAbstrait& compte, QTreeWidgetItem* parent);
 };
