@@ -37,13 +37,11 @@ public:
     static bool estInstancie();
     const QString& getFilename() const { return filename; }
     CompteRacine& getCompteRacine() const { return *compteRacine; }
-    QList<CompteAbstrait*> getComptes() const { return mapComptes.values(); }
     bool existeCompte(const QString& nom) const { return mapComptes.contains(nom); }
+    QList<CompteAbstrait*> getComptes() const { return mapComptes.values(); }
     CompteAbstrait& getCompte(const QString& nom) const;
-    CompteVirtuel& ajouterCompteVirtuel(const QString& nom, const ClasseCompte& classe);
-    CompteVirtuel& ajouterCompteVirtuel(const QString& nom, const QString& nomParent);
-    Compte& ajouterCompte(const QString& nom, const ClasseCompte& classe);
-    Compte& ajouterCompte(const QString& nom, const QString& nomParent);
+    CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel);
+    CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel);
     void sauvegarder(const QString& filename);
     void sauvegarder();
 

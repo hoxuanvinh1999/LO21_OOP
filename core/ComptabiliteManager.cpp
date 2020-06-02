@@ -46,39 +46,30 @@ CompteAbstrait& ComptabiliteManager::getCompte(const QString& nom) const {
     return *cpt;
 }
 
-CompteVirtuel& ComptabiliteManager::ajouterCompteVirtuel(const QString& nom, const ClasseCompte& classe) {
+CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
-    CompteVirtuel* cpt = new CompteVirtuel(nom, classe, *compteRacine);
+    CompteAbstrait* cpt;
+    if(virtuel) {
+        cpt = new CompteVirtuel(nom, classe, *compteRacine);
+    } else {
+        cpt = new Compte(nom, classe, *compteRacine);
+    }
     mapComptes.insert(nom, cpt);
     emit comptesModifies();
     return *cpt;
 }
 
-CompteVirtuel& ComptabiliteManager::ajouterCompteVirtuel(const QString& nom, const QString& nomParent) {
+CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
     CompteAbstrait& cptParent = getCompte(nomParent);
-    CompteVirtuel* cpt = new CompteVirtuel(nom, cptParent);
-    mapComptes.insert(nom, cpt);
-    emit comptesModifies();
-    return *cpt;
-}
-
-Compte& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe) {
-    if(existeCompte(nom))
-        throw CompteException("Nom de compte " + nom + " déjà utilisé !");
-    Compte* cpt = new Compte(nom, classe, *compteRacine);
-    mapComptes.insert(nom, cpt);
-    emit comptesModifies();
-    return *cpt;
-}
-
-Compte& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent) {
-    if(existeCompte(nom))
-        throw CompteException("Nom de compte " + nom + " déjà utilisé !");
-    CompteAbstrait& cptParent = getCompte(nomParent);
-    Compte* cpt = new Compte(nom, cptParent);
+    CompteAbstrait* cpt;
+    if(virtuel) {
+        cpt = new CompteVirtuel(nom, cptParent);
+    } else {
+        cpt = new Compte(nom, cptParent);
+    }
     mapComptes.insert(nom, cpt);
     emit comptesModifies();
     return *cpt;

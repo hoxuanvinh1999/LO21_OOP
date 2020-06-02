@@ -3,7 +3,8 @@
 
 #include <QString>
 
-static const QString NomsClasseCompte[] = { "", "Actif", "Passif", "Dépense", "Recette" };
+static const uint NombreClassesComptes = 5;
+static const QString NomsClasseCompte[NombreClassesComptes] = { QString(), "Actif", "Passif", "Dépense", "Recette" };
 
 enum ClasseCompte {
     AUCUN = 0,
@@ -12,5 +13,8 @@ enum ClasseCompte {
     DEPENSE,
     RECETTE
 };
+
+ClasseCompte getClasseCompte(const QString& nom);
+
 
 #endif // CLASSECOMPTE_H

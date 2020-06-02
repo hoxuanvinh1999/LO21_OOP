@@ -4,6 +4,7 @@ RC_ICONS = resources/icon.ico
 RESOURCES += resources.qrc
 
 SOURCES += \
+    core/ClasseCompte.cpp \
     core/ComptabiliteManager.cpp \
     core/Compte.cpp \
     core/CompteAbstrait.cpp \
