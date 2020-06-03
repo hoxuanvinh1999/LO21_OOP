@@ -15,10 +15,9 @@ ComptesForm::~ComptesForm() {
 
 void ComptesForm::definirChoixComptes() {
     ui->choixCompte->clear();
-    for(CompteAbstrait* compte : manager.getComptes()) {
-        ui->choixCompte->addItem(compte->getNom());
+    for(const CompteAbstrait& compte : manager.comptes()) {
+        ui->choixCompte->addItem(compte.getNom());
     }
-
 }
 
 void ComptesForm::chargerTable() {

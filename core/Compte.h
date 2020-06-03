@@ -15,10 +15,11 @@ private:
 public:
     double getSolde() const override { return solde; }
     double getSoldeRapprochement() const override { return soldeRapprochement; }
+    TypeCompte getType() const override { return SIMPLE; }
+    QDomElement serialiser(QDomDocument& owner) const override;
     void crediter(double montant);
     void debiter(double montant);
-    QDomElement serialiser(QDomDocument& owner) const override;
-    TypeCompte getType() const override { return SIMPLE; }
+
 };
 
 #endif // COMPTE_H

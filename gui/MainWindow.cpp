@@ -58,7 +58,7 @@ void MainWindow::demanderSauvegarde() {
 
 bool MainWindow::sauvegarder() {
     ComptabiliteManager& manager = ComptabiliteManager::getInstance();
-    if(manager.getFilename().isNull()) {
+    if(manager.getNomFichier().isNull()) {
         return sauvegarderEnTantQue();
     } else {
         try {

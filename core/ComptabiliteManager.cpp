@@ -6,7 +6,7 @@
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
-ComptabiliteManager::ComptabiliteManager(const QString& filename): filename(filename), compteRacine(new CompteRacine()), mapComptes() {
+ComptabiliteManager::ComptabiliteManager(const QString& filename): nomFichier(filename), compteRacine(new CompteRacine()), mapComptes() {
     mapComptes.insert(compteRacine->getNom(), compteRacine);
     if(!filename.isNull()) {
 
@@ -17,10 +17,10 @@ ComptabiliteManager::~ComptabiliteManager() {
     delete compteRacine;
 }
 
-ComptabiliteManager& ComptabiliteManager::charger(const QString& filename) {
+ComptabiliteManager& ComptabiliteManager::charger(const QString& nomFichier) {
     if(handler.instance)
         throw CompteException("ComptabiliteManager est déjà instancié !");
-    handler.instance = new ComptabiliteManager(filename);
+    handler.instance = new ComptabiliteManager(nomFichier);
     return *handler.instance;
 }
 
@@ -39,14 +39,14 @@ bool ComptabiliteManager::estInstancie() {
     return handler.instance;
 }
 
-CompteAbstrait& ComptabiliteManager::getCompte(const QString& nom) const {
+CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString &nom) const {
     CompteAbstrait* cpt = mapComptes.value(nom, nullptr);
     if(!cpt)
         throw CompteException("Compte " + nom + " inexistant !");
     return *cpt;
 }
 
-CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
     CompteAbstrait* cpt;
@@ -60,10 +60,10 @@ CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const Cla
     return *cpt;
 }
 
-CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel) {
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
-    CompteAbstrait& cptParent = getCompte(nomParent);
+    CompteAbstrait& cptParent = getCompteParNom(nomParent);
     CompteAbstrait* cpt;
     if(virtuel) {
         cpt = new CompteVirtuel(nom, cptParent);
@@ -75,19 +75,25 @@ CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QSt
     return *cpt;
 }
 
-void ComptabiliteManager::sauvegarder(const QString& filename) {
-    if(filename.isNull() || filename.isEmpty())
+void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
+    QString ancienNomFichier = this->nomFichier;
+    this->nomFichier = nomFichier;
+    try {
+        sauvegarder();
+    } catch(const exception e) {
+        this->nomFichier = ancienNomFichier;
+        throw e;
+    }
+}
+
+void ComptabiliteManager::sauvegarder() const {
+    if(nomFichier.isNull() || nomFichier.isEmpty())
         throw SauvegardeException("Fichier de sauvegarde non défini !");
-    QFile outFile(filename);
+    QFile outFile(nomFichier);
     if(!outFile.open(QIODevice::ReadWrite))
-        throw SauvegardeException("Erreur lors de la création du fichier " + filename + " !");
+        throw SauvegardeException("Erreur lors de la création du fichier " + nomFichier + " !");
     QTextStream stream(&outFile);
     QDomDocument doc;
     stream << doc.toString();
     outFile.close();
-    this->filename = filename;
-}
-
-void ComptabiliteManager::sauvegarder() {
-    sauvegarder(filename);
 }

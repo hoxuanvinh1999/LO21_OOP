@@ -16,8 +16,8 @@ CompteAbstrait::~CompteAbstrait() {
     if(parent) {
         parent->comptesEnfants.remove(this);
     }
-    for(CompteAbstrait* compte : comptesEnfants) {
-        delete compte;
+    for(CompteAbstrait* compteEnfant : comptesEnfants) {
+        delete compteEnfant;
     }
     qDebug() << "Destruction du compte " << nom << endl;
 }

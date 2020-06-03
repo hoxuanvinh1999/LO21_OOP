@@ -17,11 +17,11 @@ CreationCompteDialog::~CreationCompteDialog() {
 }
 
 void CreationCompteDialog::initialiserChoixComptes() {
-    for(CompteAbstrait* compte : manager.getComptes()) {
-        if(compte->getType() == VIRTUEL || compte->getType() == RACINE) {
-            ui->choixCompteParent->addItem(compte->getNom());
-        } else if(compte->getClasse() == PASSIF) {
-            ui->choixCompteCapitaux->addItem(compte->getNom());
+    for(const CompteAbstrait& compte : manager.comptes()) {
+        if(compte.getType() == VIRTUEL || compte.getType() == RACINE) {
+            ui->choixCompteParent->addItem(compte.getNom());
+        } else if(compte.getClasse() == PASSIF) {
+            ui->choixCompteCapitaux->addItem(compte.getNom());
         }
     }
 }

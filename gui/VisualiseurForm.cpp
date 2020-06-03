@@ -20,18 +20,18 @@ void VisualiseurForm::afficherArbre() {
 void VisualiseurForm::ajouterCompteRacine(const CompteRacine& compte) {
     QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget);
     item->setText(0, compte.getNom());
-    for(CompteAbstrait* compteEnfant : compte.getComptesEnfants()) {
-        ajouterCompteEnfant(*compteEnfant, item);
+    for(const CompteAbstrait& compteEnfant : compte) {
+        ajouterCompteEnfant(compteEnfant, item);
     }
 }
 
-void VisualiseurForm::ajouterCompteEnfant(const CompteAbstrait& compte, QTreeWidgetItem* parent) {
+void VisualiseurForm::ajouterCompteEnfant(const CompteAbstrait& compteEnfant, QTreeWidgetItem* parent) {
     QTreeWidgetItem* item = new QTreeWidgetItem();
-    QString text = QString(NomsClasseCompte[compte.getClasse()].at(0).toUpper()) + ":" + compte.getNom();
-    if(compte.getType() == VIRTUEL) text += " (virtuel)";
+    QString text = QString(NomsClasseCompte[compteEnfant.getClasse()].at(0).toUpper()) + ":" + compteEnfant.getNom();
+    if(compteEnfant.getType() == VIRTUEL) text += " (virtuel)";
     item->setText(0, text);
-    for(CompteAbstrait* compteEnfant : compte.getComptesEnfants()) {
-        ajouterCompteEnfant(*compteEnfant, item);
+    for(const CompteAbstrait& compteEnfant : compteEnfant) {
+        ajouterCompteEnfant(compteEnfant, item);
     }
     parent->addChild(item);
 }

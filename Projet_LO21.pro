@@ -26,9 +26,12 @@ HEADERS += \
     core/CompteException.h \
     core/CompteRacine.h \
     core/CompteVirtuel.h \
+    core/ConstReferenceIterator.h \
+    core/ConstReferenceIteratorProxy.h \
     core/ISerialisable.h \
     core/Operation.h \
     core/OperationException.h \
+    core/ReferenceIterator.h \
     core/SauvegardeException.h \
     core/Transaction.h \
     core/TypeCompte.h \

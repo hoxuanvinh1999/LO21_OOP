@@ -8,6 +8,7 @@
 #include "CompteVirtuel.h"
 #include "Compte.h"
 #include "Transaction.h"
+#include "ConstReferenceIteratorProxy.h"
 
 
 class ComptabiliteManager : public QObject {
@@ -15,7 +16,7 @@ class ComptabiliteManager : public QObject {
     Q_OBJECT
 
 private:
-    QString filename;
+    QString nomFichier;
     CompteRacine* compteRacine;
     QHash<QString, CompteAbstrait*> mapComptes;
     QHash<QString, Transaction*> mapTransactions;
@@ -25,25 +26,27 @@ private:
         ~Handler() { delete instance; }
     };
     static Handler handler;
-    ComptabiliteManager(const QString& filename);
+    ComptabiliteManager(const QString& nomFichier);
+    CompteAbstrait& getCompteParNom(const QString& nom) const;
 
 public:
+    typedef ConstReferenceIteratorProxy<QList, CompteAbstrait> const_iterator_proxy;
     ComptabiliteManager(const ComptabiliteManager&) = delete;
     ComptabiliteManager& operator=(const ComptabiliteManager&) = delete;
     ~ComptabiliteManager();
-    static ComptabiliteManager& charger(const QString& filename = QString());
+    static ComptabiliteManager& charger(const QString& nomFichier = QString());
     static ComptabiliteManager& getInstance();
     static void libererInstance();
     static bool estInstancie();
-    const QString& getFilename() const { return filename; }
-    CompteRacine& getCompteRacine() const { return *compteRacine; }
+    const QString& getNomFichier() const { return nomFichier; }
+    const CompteRacine& getCompteRacine() const { return *compteRacine; }
     bool existeCompte(const QString& nom) const { return mapComptes.contains(nom); }
-    QList<CompteAbstrait*> getComptes() const { return mapComptes.values(); }
-    CompteAbstrait& getCompte(const QString& nom) const;
-    CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel);
-    CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel);
-    void sauvegarder(const QString& filename);
-    void sauvegarder();
+    const_iterator_proxy comptes() const { return mapComptes.values(); }
+    const CompteAbstrait& getCompte(const QString& nom) const { return getCompteParNom(nom); }
+    const CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel);
+    const CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel);
+    void sauvegarder(const QString& nomFichier);
+    void sauvegarder() const;
 
 signals:
     void comptesModifies();
