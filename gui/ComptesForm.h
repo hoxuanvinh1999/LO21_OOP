@@ -16,15 +16,21 @@ public:
     ~ComptesForm();
 
 public slots:
-    void definirChoixComptes();
-    void chargerTable();
+    void ajouterChoixCompte(const QString& nomCompte);
+
+    void modifierAffichageCompte(const QString& nomCompte);
 
 private slots:
     void on_boutonAjouterCompte_clicked();
 
+    void on_choixCompte_currentIndexChanged(int);
+
 private:
     Ui::ComptesForm *ui;
     ComptabiliteManager& manager;
+    void definirSolde();
+    void chargerTable();
+    void definirChoixComptes();
 };
 
 #endif // COMPTESFORM_H

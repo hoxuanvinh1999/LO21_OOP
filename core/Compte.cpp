@@ -1,15 +1,15 @@
 #include "Compte.h"
 #include "CompteException.h"
 
-Compte::Compte(const QString& nom, CompteAbstrait& parent): CompteAbstrait(nom, parent.getClasse(), &parent) {
-    if(parent.getType() != VIRTUEL)
+Compte::Compte(const QString& nom, CompteAbstrait* parent): CompteAbstrait(nom, parent->getClasse(), parent), solde(0), soldeRapprochement(0) {
+    if(parent->getType() != VIRTUEL)
         throw CompteException("Le parent du compte doit etre un compte virtuel !");
 }
 
-Compte::Compte(const QString& nom, const ClasseCompte& classe, CompteAbstrait& racine): CompteAbstrait(nom, classe, &racine), solde(0), soldeRapprochement(0) {
+Compte::Compte(const QString& nom, const ClasseCompte& classe, CompteAbstrait* racine): CompteAbstrait(nom, classe, racine), solde(0), soldeRapprochement(0) {
     if(classe == AUCUN)
         throw CompteException("Le compte doit posseder une classe !");
-    if(racine.getType() != RACINE)
+    if(racine->getType() != RACINE)
         throw CompteException("Le parent du compte doit etre un compte racine !");
 }
 

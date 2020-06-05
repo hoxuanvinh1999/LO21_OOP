@@ -1,20 +1,94 @@
 #include "core/ComptabiliteManager.h"
 #include "core/CompteException.h"
 #include "core/SauvegardeException.h"
+#include "core/TransactionException.h"
 #include <QFile>
 #include <QTextStream>
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
-ComptabiliteManager::ComptabiliteManager(const QString& filename): nomFichier(filename), compteRacine(new CompteRacine()), mapComptes() {
-    mapComptes.insert(compteRacine->getNom(), compteRacine);
-    if(!filename.isNull()) {
+ComptabiliteManager::ComptabiliteManager(const QString& nomFichier): nomFichier(nomFichier), compteRacine(), mapComptes() {
+    ajouterCompte(&compteRacine);
+    chargerDonnees();
+    sauvegarde = true;
+}
 
+void ComptabiliteManager::chargerDonnees() {
+    if(!nomFichier.isNull()) {
+        QFile file(nomFichier);
+        if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            throw SauvegardeException("Erreur de lecture du fichier de sauvegarde !");
+        try {
+            QDomDocument doc;
+            doc.setContent(&file);
+            chargerComptes(doc);
+            chargerTransactions(doc);
+        } catch(const exception& e) {
+            throw SauvegardeException("Fichier de sauvegarde corrompu !");
+        }
     }
 }
 
-ComptabiliteManager::~ComptabiliteManager() {
-    delete compteRacine;
+void ComptabiliteManager::chargerComptes(const QDomDocument& doc) {
+    QDomNodeList comptesXml = doc.elementsByTagName("Compte");
+    if(comptesXml.size() == 0 || static_cast<TypeCompte>(comptesXml.item(0).toElement().attribute("type").toUInt()) != RACINE)
+        throw SauvegardeException("Fichier de sauvegarde corrompu !");
+    for(int i = 1; i < comptesXml.size(); ++i) {
+        QDomElement compteXml = comptesXml.item(i).toElement();
+        TypeCompte type = static_cast<TypeCompte>(compteXml.attribute("type").toUInt());
+        bool virtuel = type == VIRTUEL;
+        QString nom = compteXml.attribute("nom");
+        QString nomParent = compteXml.attribute("parent");
+        if(nomParent == compteRacine.getNom()) {
+            ClasseCompte classe = static_cast<ClasseCompte>(compteXml.attribute("classe").toUInt());
+            ajouterCompte(nom, classe, virtuel);
+        } else {
+            ajouterCompte(nom, nomParent, virtuel);
+        }
+    }
+}
+
+void ComptabiliteManager::chargerTransactions(const QDomDocument& doc) {
+    QDomNodeList transactionsXml = doc.elementsByTagName("Transaction");
+    for(int i = 0; i < transactionsXml.size(); ++i) {
+        QDomElement transactionXml = transactionsXml.item(i).toElement();
+        QDate date = QDate::fromString(transactionXml.attribute("date"));
+        QString reference = transactionXml.attribute("reference");
+        QString intitule = transactionXml.attribute("intitule");
+        QList<Operation> operations;
+        QDomNodeList operationsXml = transactionXml.elementsByTagName("Operation");
+        for(int j = 0; j < operationsXml.size(); ++j) {
+            QDomElement operationXml = operationsXml.item(j).toElement();
+            double montant = operationXml.attribute("montant").toDouble();
+            TypeOperation type = static_cast<TypeOperation>(operationXml.attribute("type").toUInt());
+            QString nomCompte = operationXml.attribute("compte");
+            operations.append(Operation(montant, type, nomCompte));
+        }
+        ajouterTransaction(date, reference, intitule, operations);
+    }
+}
+
+void ComptabiliteManager::sauvegarderComptes(QDomDocument& doc) const {
+    QDomElement comptesXml = doc.createElement("Comptes");
+    doc.appendChild(comptesXml);
+    sauvegarderCompteEtEnfants(doc, comptesXml, compteRacine);
+}
+
+void ComptabiliteManager::sauvegarderCompteEtEnfants(QDomDocument& doc, QDomElement& comptesXml, const CompteAbstrait& compte) const {
+    QDomElement compteXml = compte.serialiser(doc);
+    comptesXml.appendChild(compteXml);
+    for(const CompteAbstrait& compteEnfant : compte) {
+        sauvegarderCompteEtEnfants(doc, comptesXml, compteEnfant);
+    }
+}
+
+void ComptabiliteManager::sauvegarderTransactions(QDomDocument& doc) const {
+    QDomElement transactionsXml = doc.createElement("Transactions");
+    doc.appendChild(transactionsXml);
+    for(const Transaction* transaction : mapTransactions) {
+        QDomElement transactionXml = transaction->serialiser(doc);
+        transactionsXml.appendChild(transactionXml);
+    }
 }
 
 ComptabiliteManager& ComptabiliteManager::charger(const QString& nomFichier) {
@@ -39,40 +113,109 @@ bool ComptabiliteManager::estInstancie() {
     return handler.instance;
 }
 
-CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString &nom) const {
+void ComptabiliteManager::ajouterCompte(CompteAbstrait* compte) {
+    mapComptes.insert(compte->getNom(), compte);
+    emit compteAjoute(compte->getNom());
+    sauvegarde = false;
+}
+
+CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nom) const {
     CompteAbstrait* cpt = mapComptes.value(nom, nullptr);
     if(!cpt)
         throw CompteException("Compte " + nom + " inexistant !");
     return *cpt;
 }
 
+void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
+    mapTransactions.insert(transaction->getReference(), transaction);
+    emit transactionAjoutee(transaction->getReference());
+    sauvegarde = false;
+}
+
+Transaction& ComptabiliteManager::getTransactionParReference(const QString& reference) const {
+    Transaction* transac = mapTransactions.value(reference, nullptr);
+    if(!transac)
+        throw TransactionException("Transaction " + reference + " inexistante !");
+    return *transac;
+}
+
+void ComptabiliteManager::verifierOperations(const QList<Operation>& operations) const {
+    for(const Operation& operation : operations) {
+        if(!existeCompte(operation.getNomCompte()))
+            throw TransactionException("Le compte " + operation.getNomCompte() + " de la transaction n'existe pas !");
+    }
+}
+
+void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
+    for(const Operation& operation : *transaction) {
+        double montant = operation.getMontant();
+        const TypeOperation& type = operation.getType();
+        CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
+        if(type == DEBIT) {
+            compte.debiter(montant);
+        } else {
+            compte.crediter(montant);
+        }
+        emit compteModifie(compte.getNom());
+    }
+}
+
 const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
-    CompteAbstrait* cpt;
+    CompteAbstrait* compte;
     if(virtuel) {
-        cpt = new CompteVirtuel(nom, classe, *compteRacine);
+        compte = new CompteVirtuel(nom, classe, &compteRacine);
     } else {
-        cpt = new Compte(nom, classe, *compteRacine);
+        compte = new Compte(nom, classe, &compteRacine);
     }
-    mapComptes.insert(nom, cpt);
-    emit comptesModifies();
-    return *cpt;
+    ajouterCompte(compte);
+    return *compte;
 }
 
 const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
     CompteAbstrait& cptParent = getCompteParNom(nomParent);
-    CompteAbstrait* cpt;
+    CompteAbstrait* compte;
     if(virtuel) {
-        cpt = new CompteVirtuel(nom, cptParent);
+        compte = new CompteVirtuel(nom, &cptParent);
     } else {
-        cpt = new Compte(nom, cptParent);
+        compte = new Compte(nom, &cptParent);
     }
-    mapComptes.insert(nom, cpt);
-    emit comptesModifies();
-    return *cpt;
+    ajouterCompte(compte);
+    return *compte;
+}
+
+bool transactionsLesserCompare(const Transaction* t1, const Transaction* t2) {
+    return t1->getDate() < t2->getDate();
+}
+
+ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::transactions() const {
+    QList<Transaction*> transactions = mapTransactions.values();
+    std::stable_sort(transactions.begin(), transactions.end(), transactionsLesserCompare);
+    return transactions;
+}
+
+ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nom) const {
+    QList<Transaction*> transactions;
+    for(Transaction* transaction : mapTransactions) {
+        if(transaction->impliqueCompte(nom)) {
+            transactions.append(transaction);
+        }
+    }
+    std::stable_sort(transactions.begin(), transactions.end(), transactionsLesserCompare);
+    return transactions;
+}
+
+const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations) {
+    if(existeTransaction(reference))
+        throw CompteException("Référence de transaction " + reference + " déjà utilisé !");
+    verifierOperations(operations);
+    Transaction* transaction = new Transaction(date, reference, intitule, operations);
+    appliquerTransaction(transaction);
+    ajouterTransaction(transaction);
+    return *transaction;
 }
 
 void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
@@ -86,14 +229,19 @@ void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
     }
 }
 
-void ComptabiliteManager::sauvegarder() const {
+void ComptabiliteManager::sauvegarder() {
     if(nomFichier.isNull() || nomFichier.isEmpty())
         throw SauvegardeException("Fichier de sauvegarde non défini !");
     QFile outFile(nomFichier);
     if(!outFile.open(QIODevice::ReadWrite))
         throw SauvegardeException("Erreur lors de la création du fichier " + nomFichier + " !");
-    QTextStream stream(&outFile);
     QDomDocument doc;
+    sauvegarderComptes(doc);
+    sauvegarderTransactions(doc);
+    QTextStream stream(&outFile);
     stream << doc.toString();
     outFile.close();
+    sauvegarde = true;
 }
+
+

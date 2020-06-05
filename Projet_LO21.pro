@@ -10,9 +10,11 @@ SOURCES += \
     core/CompteAbstrait.cpp \
     core/CompteVirtuel.cpp \
     core/Operation.cpp \
+    core/Transaction.cpp \
     gui/ComptabiliteForm.cpp \
     gui/ComptesForm.cpp \
     gui/CreationCompteDialog.cpp \
+    gui/CreationTransactionDialog.cpp \
     gui/MainWindow.cpp \
     gui/TransactionsForm.cpp \
     gui/VisualiseurForm.cpp \
@@ -34,11 +36,13 @@ HEADERS += \
     core/ReferenceIterator.h \
     core/SauvegardeException.h \
     core/Transaction.h \
+    core/TransactionException.h \
     core/TypeCompte.h \
     core/TypeOperation.h \
     gui/ComptabiliteForm.h \
     gui/ComptesForm.h \
     gui/CreationCompteDialog.h \
+    gui/CreationTransactionDialog.h \
     gui/MainWindow.h \
     gui/TransactionsForm.h \
     gui/VisualiseurForm.h
@@ -49,6 +53,7 @@ FORMS += \
     gui/ComptabiliteForm.ui \
     gui/ComptesForm.ui \
     gui/CreationCompteDialog.ui \
+    gui/CreationTransactionDialog.ui \
     gui/MainWindow.ui \
     gui/TransactionsForm.ui \
     gui/VisualiseurForm.ui

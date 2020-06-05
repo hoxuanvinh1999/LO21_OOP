@@ -6,10 +6,8 @@
 #include "Compte.h"
 
 class CompteRacine : public CompteAbstrait {
-private:
-    CompteRacine(): CompteAbstrait("Compte racine", AUCUN) {}
-    friend class ComptabiliteManager;
 public:
+    CompteRacine(): CompteAbstrait("Compte racine", AUCUN) {}
     TypeCompte getType() const override { return RACINE; }
 };
 

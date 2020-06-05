@@ -5,7 +5,7 @@
 
 CompteAbstrait::CompteAbstrait(const QString& nom, const ClasseCompte& classe, CompteAbstrait* parent): nom(nom), classe(classe), parent(parent) {
     if(nom.trimmed().isEmpty())
-        throw CompteException("Le nom du compte ne peut pas etre vide !");
+        throw CompteException("Le nom du compte ne peut pas être vide !");
     if(parent) {
         parent->comptesEnfants.insert(this);
     }

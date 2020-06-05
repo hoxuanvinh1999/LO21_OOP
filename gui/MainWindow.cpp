@@ -2,9 +2,10 @@
 #include "ui_MainWindow.h"
 #include "core/ComptabiliteManager.h"
 #include <QFileDialog>
-#include <QDebug>
 #include <QMessageBox>
+#include <QCloseEvent>
 #include "core/SauvegardeException.h"
+
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -14,8 +15,9 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::fermerSessionActuelle() {
-    demanderSauvegarde();
+bool MainWindow::fermerSessionActuelle() {
+    if(!demanderSauvegarde())
+        return false;
     ComptabiliteManager::libererInstance();
     ui->actionSauvegarder->setEnabled(false);
     ui->actionSauvegarderEnTantQue->setEnabled(false);
@@ -25,6 +27,7 @@ void MainWindow::fermerSessionActuelle() {
     ui->actionGenererResultat->setEnabled(false);
     delete comptabiliteForm;
     comptabiliteForm = nullptr;
+    return true;
 }
 
 void MainWindow::ouvrirNouvelleSession(const QString& filename) {
@@ -37,23 +40,28 @@ void MainWindow::ouvrirNouvelleSession(const QString& filename) {
     ui->actionGenererResultat->setEnabled(true);
     comptabiliteForm = new ComptabiliteForm(this);
     this->centralWidget()->layout()->addWidget(comptabiliteForm);
+
 }
 
-void MainWindow::demanderSauvegarde() {
-    if(ComptabiliteManager::estInstancie()) {
+bool MainWindow::demanderSauvegarde() {
+    if(ComptabiliteManager::estInstancie() && !ComptabiliteManager::getInstance().estSauvegarde()) {
         bool fin = false;
         while(!fin) {
-            QMessageBox msgBox(QMessageBox::Information, "Sauvegarde de vos données", "Souhaitez vous sauvegarder les données sur lequel vous travaillez actuellement ?", QMessageBox::Yes | QMessageBox::No, this);
+            QMessageBox msgBox(QMessageBox::Information, "Sauvegarde de vos données", "Souhaitez vous sauvegarder les données sur lequel vous travaillez actuellement ?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
             msgBox.setButtonText(QMessageBox::Yes, "Oui");
             msgBox.setButtonText(QMessageBox::No, "Non");
+            msgBox.setButtonText(QMessageBox::Cancel, "Annuler");
             QMessageBox::StandardButton reponse = static_cast<QMessageBox::StandardButton>(msgBox.exec());
             if(reponse == QMessageBox::Yes) {
                 fin = sauvegarder();
-            } else {
+            } else if(reponse == QMessageBox::No) {
                 fin = true;
+            } else {
+                return false;
             }
         }
     }
+    return true;
 }
 
 bool MainWindow::sauvegarder() {
@@ -89,20 +97,33 @@ bool MainWindow::sauvegarderEnTantQue() {
 }
 
 void MainWindow::on_actionQuitter_triggered() {
-    demanderSauvegarde();
-    close();
+    if(demanderSauvegarde()) {
+        close();
+    }
 }
 
 void MainWindow::on_actionNouveau_triggered() {
-    fermerSessionActuelle();
-    ouvrirNouvelleSession();
+    if(fermerSessionActuelle()) {
+        ouvrirNouvelleSession();
+    }
 }
 
 void MainWindow::on_actionCharger_triggered() {
-    fermerSessionActuelle();
-    QString filename = QFileDialog::getOpenFileName(this, "Ouvrir fichier de sauvegarde", "", "Fichier de sauvegarde (*.xml);;Tout fichier (*)");
-    if(!filename.isEmpty()) {
-        ouvrirNouvelleSession(filename);
+    if(fermerSessionActuelle()) {
+        bool fin = false;
+        while(!fin) {
+            QString filename = QFileDialog::getOpenFileName(this, "Ouvrir fichier de sauvegarde", "", "Fichier de sauvegarde (*.xml);;Tout fichier (*)");
+            if(!filename.isEmpty()) {
+                try {
+                    ouvrirNouvelleSession(filename);
+                    fin = true;
+                } catch(const SauvegardeException& e) {
+                    QMessageBox::critical(this, "Erreur de chargement", e.what());
+                }
+            } else {
+                fin = true;
+            }
+        }
     }
 }
 
@@ -122,8 +143,10 @@ void MainWindow::on_actionSauvegarderEnTantQue_triggered() {
     }
 }
 
-void MainWindow::closeEvent(QCloseEvent*) {
-    demanderSauvegarde();
+void MainWindow::closeEvent(QCloseEvent* e) {
+    if(!demanderSauvegarde()) {
+        e->ignore();
+    }
 }
 
 void MainWindow::on_actionGenererBilan_triggered() {

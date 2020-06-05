@@ -5,7 +5,7 @@
 
 class ISerialisable {
 public:
-    virtual QDomElement serialiser(QDomDocument& owner) const = 0;
+    virtual QDomElement serialiser(QDomDocument& doc) const = 0;
     virtual ~ISerialisable() = default;
 };
 

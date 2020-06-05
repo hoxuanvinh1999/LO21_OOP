@@ -2,7 +2,6 @@
 #include "ui_CreationCompteDialog.h"
 #include "core/CompteException.h"
 #include <QMessageBox>
-#include <QDebug>
 
 CreationCompteDialog::CreationCompteDialog(QWidget *parent): QDialog(parent), ui(new Ui::CreationCompteDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);

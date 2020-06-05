@@ -2,7 +2,6 @@
 #define CONSTREFERENCEITERATORPROXY_H
 
 #include "ConstReferenceIterator.h"
-#include <QDebug>
 
 template<template <typename> class Container, typename T>
 class ConstReferenceIteratorProxy {

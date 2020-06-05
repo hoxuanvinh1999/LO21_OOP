@@ -35,15 +35,15 @@ private slots:
     void on_actionGenererResultat_triggered();
 
 protected slots:
-    void closeEvent(QCloseEvent*) override;
+    void closeEvent(QCloseEvent* e) override;
 
 private:
     Ui::MainWindow* ui;
     ComptabiliteForm* comptabiliteForm = nullptr;
-    void demanderSauvegarde();
+    bool demanderSauvegarde();
     bool sauvegarder();
     bool sauvegarderEnTantQue();
-    void fermerSessionActuelle();
+    bool fermerSessionActuelle();
     void ouvrirNouvelleSession(const QString& filename = QString());
 };
 

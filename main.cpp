@@ -1,6 +1,6 @@
 #include <QApplication>
 #include "gui/MainWindow.h"
-#include <QDebug>
+#include "core/Transaction.h"
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);

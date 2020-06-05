@@ -34,22 +34,25 @@ public:
     const_iterator constEnd() const { return comptesEnfants.cbegin(); }
     reverse_iterator rbegin() { return reverse_iterator(end()); }
     reverse_iterator rend() { return reverse_iterator(begin()); }
-    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
-    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
-    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
-    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+    const_reverse_iterator crbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator crend() const { return const_reverse_iterator(begin()); }
     CompteAbstrait() = delete;
-    CompteAbstrait(const CompteAbstrait& compte) = delete;
-    CompteAbstrait& operator=(const CompteAbstrait& compte) = delete;
+    CompteAbstrait(const CompteAbstrait&) = delete;
+    CompteAbstrait& operator=(const CompteAbstrait&) = delete;
     CompteAbstrait(const QString& nom, const ClasseCompte& classe, CompteAbstrait* parent = nullptr);
     virtual ~CompteAbstrait();
     const QString& getNom() const { return nom; }
     const ClasseCompte& getClasse() const { return classe; }
     const CompteAbstrait* getParent() const { return parent; }
     CompteAbstrait* getParent() { return parent; }
+    QString toString() const { return QString(NomsClasseCompte[classe].at(0)).toUpper() + ":" + nom; }
+    virtual void debiter(double) {}
+    virtual void crediter(double) {}
     virtual double getSolde() const;
     virtual double getSoldeRapprochement() const;
-    QDomElement serialiser(QDomDocument& owner) const override;
+    QDomElement serialiser(QDomDocument& doc) const override;
     virtual TypeCompte getType() const = 0;
 };
 

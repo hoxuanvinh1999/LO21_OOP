@@ -4,7 +4,7 @@
 VisualiseurForm::VisualiseurForm(QWidget *parent): QWidget(parent), ui(new Ui::VisualiseurForm), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     ui->treeWidget->setHeaderLabel("Comptes");
-    connect(&manager, SIGNAL(comptesModifies()), this, SLOT(afficherArbre()));
+    connect(&manager, SIGNAL(compteAjoute(const QString&)), this, SLOT(afficherArbre()));
     afficherArbre();
 }
 
@@ -27,7 +27,7 @@ void VisualiseurForm::ajouterCompteRacine(const CompteRacine& compte) {
 
 void VisualiseurForm::ajouterCompteEnfant(const CompteAbstrait& compteEnfant, QTreeWidgetItem* parent) {
     QTreeWidgetItem* item = new QTreeWidgetItem();
-    QString text = QString(NomsClasseCompte[compteEnfant.getClasse()].at(0).toUpper()) + ":" + compteEnfant.getNom();
+    QString text = compteEnfant.toString();
     if(compteEnfant.getType() == VIRTUEL) text += " (virtuel)";
     item->setText(0, text);
     for(const CompteAbstrait& compteEnfant : compteEnfant) {

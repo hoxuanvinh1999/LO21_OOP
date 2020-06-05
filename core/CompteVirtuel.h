@@ -6,11 +6,9 @@
 class CompteRacine;
 
 class CompteVirtuel : public CompteAbstrait {
-private:
-    CompteVirtuel(const QString& nom, CompteAbstrait& parent);
-    CompteVirtuel(const QString& nom, const ClasseCompte& classe, CompteAbstrait& racine);
-    friend class ComptabiliteManager;
 public:
+    CompteVirtuel(const QString& nom, CompteAbstrait* parent);
+    CompteVirtuel(const QString& nom, const ClasseCompte& classe, CompteAbstrait* racine);
     TypeCompte getType() const override { return VIRTUEL; }
 };
 
