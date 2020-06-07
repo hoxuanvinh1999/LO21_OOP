@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Création d'une transaction</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -142,6 +142,14 @@
          <bool>true</bool>
         </property>
         <widget class="QWidget" name="widgetOperations">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>510</width>
+           <height>69</height>
+          </rect>
+         </property>
          <layout class="QVBoxLayout" name="layoutOperations"/>
         </widget>
        </widget>

@@ -1,12 +1,14 @@
 #include "TransactionsForm.h"
 #include "ui_TransactionsForm.h"
 #include "CreationTransactionDialog.h"
+#include "SuppressionTransactionDialog.h"
 #include <QMessageBox>
 
 TransactionsForm::TransactionsForm(QWidget *parent): QWidget(parent), ui(new Ui::TransactionsForm), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     connect(&manager, SIGNAL(transactionAjoutee(const QString&)), this, SLOT(ajouterChoixTransaction(const QString&)));
     connect(&manager, SIGNAL(transactionModifiee(const QString&)), this, SLOT(modifierAffichageTransaction(const QString&)));
+    connect(&manager, SIGNAL(transactionSupprimee(const QString&)), this, SLOT(supprimerChoixTransaction(const QString&)));
     definirChoixTransactions();
     chargerTable();
 }
@@ -24,6 +26,10 @@ void TransactionsForm::definirChoixTransactions() {
 
 void TransactionsForm::ajouterChoixTransaction(const QString& referenceTransaction) {
     ui->choixTransaction->addItem(referenceTransaction);
+}
+
+void TransactionsForm::supprimerChoixTransaction(const QString& referenceTransaction) {
+    ui->choixTransaction->removeItem(ui->choixTransaction->findText(referenceTransaction));
 }
 
 void TransactionsForm::chargerTable() {
@@ -70,7 +76,8 @@ void TransactionsForm::on_boutonAjouterTransaction_clicked() {
 }
 
 void TransactionsForm::on_boutonSupprimerTransaction_clicked() {
-
+    SuppressionTransactionDialog* dialog = new SuppressionTransactionDialog(this);
+    dialog->exec();
 }
 
 void TransactionsForm::on_choixTransaction_currentIndexChanged(int) {

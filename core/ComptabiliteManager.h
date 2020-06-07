@@ -39,6 +39,7 @@ private:
     void ajouterCompte(CompteAbstrait* compte);
     CompteAbstrait& getCompteParNom(const QString& nom) const;
     void ajouterTransaction(Transaction* transaction);
+    void supprimerTransaction(Transaction* transaction);
     Transaction& getTransactionParReference(const QString& reference) const;
     void verifierOperations(const QList<Operation>& operations) const;
     void appliquerTransaction(const Transaction* transaction);
@@ -70,6 +71,7 @@ public:
     const CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel);
     const CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel);
     const Transaction& ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations);
+    void supprimerTransaction(const QString& referenceTransaction);
     void sauvegarder(const QString& nomFichier);
     void sauvegarder();
 
@@ -78,6 +80,7 @@ signals:
     void transactionAjoutee(const QString& referenceTransaction) const;
     void compteModifie(const QString& nomCompte) const;
     void transactionModifiee(const QString& referenceTransaction) const;
+    void transactionSupprimee(const QString& referenceTransaction) const;
 };
 
 #endif // COMPTABILITEMANAGER_H

@@ -20,6 +20,8 @@ public slots:
 
     void modifierAffichageTransaction(const QString& referenceTransaction);
 
+    void supprimerChoixTransaction(const QString& referenceTransaction);
+
 private slots:
     void on_boutonAjouterTransaction_clicked();
 

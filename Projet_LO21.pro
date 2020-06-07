@@ -19,6 +19,7 @@ SOURCES += \
     gui/CreationTransactionDialog.cpp \
     gui/MainWindow.cpp \
     gui/OperationForm.cpp \
+    gui/SuppressionTransactionDialog.cpp \
     gui/TransactionsForm.cpp \
     gui/VisualiseurForm.cpp \
     main.cpp
@@ -48,6 +49,7 @@ HEADERS += \
     gui/CreationTransactionDialog.h \
     gui/MainWindow.h \
     gui/OperationForm.h \
+    gui/SuppressionTransactionDialog.h \
     gui/TransactionsForm.h \
     gui/VisualiseurForm.h
 
@@ -60,5 +62,6 @@ FORMS += \
     gui/CreationTransactionDialog.ui \
     gui/MainWindow.ui \
     gui/OperationForm.ui \
+    gui/SuppressionTransactionDialog.ui \
     gui/TransactionsForm.ui \
     gui/VisualiseurForm.ui

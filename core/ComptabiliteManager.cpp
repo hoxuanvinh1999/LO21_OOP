@@ -155,6 +155,15 @@ ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimpl
 void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
     mapTransactions.insert(transaction->getReference(), transaction);
     emit transactionAjoutee(transaction->getReference());
+    informerModificationComptes(transaction);
+    sauvegarde = false;
+}
+
+void ComptabiliteManager::supprimerTransaction(Transaction* transaction) {
+    mapTransactions.remove(transaction->getReference());
+    emit transactionSupprimee(transaction->getReference());
+    informerModificationComptes(transaction);
+    delete transaction;
     sauvegarde = false;
 }
 
@@ -181,6 +190,19 @@ void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
             compte.debiter(montant);
         } else {
             compte.crediter(montant);
+        }
+    }
+}
+
+void ComptabiliteManager::annulerTransaction(const Transaction* transaction) {
+    for(const Operation& operation : transaction->operations()) {
+        double montant = operation.getMontant();
+        const TypeOperation& type = operation.getType();
+        CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
+        if(type == DEBIT) {
+            compte.crediter(montant);
+        } else {
+            compte.debiter(montant);
         }
     }
 }
@@ -241,13 +263,22 @@ ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransac
 
 const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations) {
     if(existeTransaction(reference))
-        throw CompteException("Référence de transaction " + reference + " déjà utilisé !");
+        throw TransactionException("Référence de transaction " + reference + " déjà utilisé !");
     verifierOperations(operations);
     Transaction* transaction = new Transaction(date, reference, intitule, operations);
     appliquerTransaction(transaction);
     ajouterTransaction(transaction);
-    informerModificationComptes(transaction);
     return *transaction;
+}
+
+void ComptabiliteManager::supprimerTransaction(const QString& referenceTransaction) {
+    if(!existeTransaction(referenceTransaction))
+        throw TransactionException("La transaction de référence " + referenceTransaction + " n'existe pas !");
+    Transaction& transaction = getTransactionParReference(referenceTransaction);
+    if(transaction.estFigee())
+        throw TransactionException("Une transaction figée ne peut pas être supprimée !");
+    annulerTransaction(&transaction);
+    supprimerTransaction(&transaction);
 }
 
 void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
