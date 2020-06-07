@@ -4,7 +4,7 @@
 #include "core/TransactionException.h"
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
+#include <QTextCodec>
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
@@ -20,11 +20,16 @@ void ComptabiliteManager::chargerDonnees() {
         if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
             throw SauvegardeException("Erreur de lecture du fichier de sauvegarde !");
         try {
+            QTextStream in(&file);
+            in.setCodec(QTextCodec::codecForName("ISO 8859-1"));
+            QString content = in.readAll();
             QDomDocument doc;
-            doc.setContent(&file);
+            doc.setContent(content);
             chargerComptes(doc);
             chargerTransactions(doc);
+            file.close();
         } catch(const exception& e) {
+           file.close();
             throw SauvegardeException("Fichier de sauvegarde corrompu !");
         }
     }
@@ -38,8 +43,8 @@ void ComptabiliteManager::chargerComptes(const QDomDocument& doc) {
         QDomElement compteXml = comptesXml.item(i).toElement();
         TypeCompte type = static_cast<TypeCompte>(compteXml.attribute("type").toUInt());
         bool virtuel = type == VIRTUEL;
-        QString nom = compteXml.attribute("nom").toUtf8();
-        QString nomParent = compteXml.attribute("parent").toUtf8();
+        QString nom = compteXml.attribute("nom");
+        QString nomParent = compteXml.attribute("parent");
         if(nomParent == compteRacine.getNom()) {
             ClasseCompte classe = static_cast<ClasseCompte>(compteXml.attribute("classe").toUInt());
             ajouterCompte(nom, classe, virtuel);
@@ -54,15 +59,15 @@ void ComptabiliteManager::chargerTransactions(const QDomDocument& doc) {
     for(int i = 0; i < transactionsXml.size(); ++i) {
         QDomElement transactionXml = transactionsXml.item(i).toElement();
         QDate date = QDate::fromString(transactionXml.attribute("date"), Qt::LocalDate);
-        QString reference = transactionXml.attribute("reference").toUtf8();
-        QString intitule = transactionXml.attribute("intitule").toUtf8();
+        QString reference = transactionXml.attribute("reference");
+        QString intitule = transactionXml.attribute("intitule");
         QList<Operation> operations;
         QDomNodeList operationsXml = transactionXml.elementsByTagName("Operation");
         for(int j = 0; j < operationsXml.size(); ++j) {
             QDomElement operationXml = operationsXml.item(j).toElement();
             double montant = operationXml.attribute("montant").toDouble();
             TypeOperation type = static_cast<TypeOperation>(operationXml.attribute("type").toUInt());
-            QString nomCompte = operationXml.attribute("compte").toUtf8();
+            QString nomCompte = operationXml.attribute("compte");
             operations.append(Operation(montant, type, nomCompte));
         }
         ajouterTransaction(date, reference, intitule, operations);
