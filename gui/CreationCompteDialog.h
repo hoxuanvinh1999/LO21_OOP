@@ -34,7 +34,6 @@ private:
     void initialiserChoixComptes();
     void updateGroupeSoldeInitial();
     void updateChoixClasse();
-    void updateChoixCompteCapitaux();
 };
 
 #endif // CREATIONCOMPTEDIALOG_H

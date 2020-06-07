@@ -16,5 +16,16 @@ enum ClasseCompte {
 
 ClasseCompte getClasseCompte(const QString& nom);
 
+using namespace std;
+
+class ClasseCompteException : public exception {
+private:
+    QString message;
+public:
+    ClasseCompteException(const QString& message) noexcept : message(message) {}
+    virtual ~ClasseCompteException() noexcept {}
+    const char* what() const noexcept override  { return message.toStdString().c_str(); }
+};
+
 
 #endif // CLASSECOMPTE_H

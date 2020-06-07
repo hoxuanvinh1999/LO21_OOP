@@ -11,11 +11,14 @@ SOURCES += \
     core/CompteVirtuel.cpp \
     core/Operation.cpp \
     core/Transaction.cpp \
+    core/TypeCompte.cpp \
+    core/TypeOperation.cpp \
     gui/ComptabiliteForm.cpp \
     gui/ComptesForm.cpp \
     gui/CreationCompteDialog.cpp \
     gui/CreationTransactionDialog.cpp \
     gui/MainWindow.cpp \
+    gui/OperationForm.cpp \
     gui/TransactionsForm.cpp \
     gui/VisualiseurForm.cpp \
     main.cpp
@@ -44,6 +47,7 @@ HEADERS += \
     gui/CreationCompteDialog.h \
     gui/CreationTransactionDialog.h \
     gui/MainWindow.h \
+    gui/OperationForm.h \
     gui/TransactionsForm.h \
     gui/VisualiseurForm.h
 
@@ -55,5 +59,6 @@ FORMS += \
     gui/CreationCompteDialog.ui \
     gui/CreationTransactionDialog.ui \
     gui/MainWindow.ui \
+    gui/OperationForm.ui \
     gui/TransactionsForm.ui \
     gui/VisualiseurForm.ui

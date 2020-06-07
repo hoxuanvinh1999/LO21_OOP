@@ -28,9 +28,11 @@ void ComptesForm::ajouterChoixCompte(const QString& nomCompte) {
 }
 
 void ComptesForm::chargerTable() {
-    ui->tableWidget->clearContents();
+    ui->tableTransactionsCompte->model()->removeRows(0, ui->tableTransactionsCompte->rowCount());
     QString nomCompte = ui->choixCompte->currentText();
+    const CompteAbstrait& compte = manager.getCompte(nomCompte);
     auto transactions = manager.getTransactionsCompte(nomCompte);
+    ui->tableTransactionsCompte->model()->insertRows(0, transactions.size());
     int i = 0;
     double solde = 0;
     for(const Transaction& transaction : transactions) {
@@ -40,29 +42,42 @@ void ComptesForm::chargerTable() {
         const Operation& operation = transaction.getOperation(nomCompte);
         const TypeOperation type = operation.getType();
         double montant = operation.getMontant();
-        solde += montant;
-        ui->tableWidget->insertRow(0);
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(date.toString()));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(reference));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(intitule));
         if(type == DEBIT) {
-            ui->tableWidget->setItem(i, 3, new QTableWidgetItem(montant));
+            if(compte.getClasse() == ACTIF || compte.getClasse() == DEPENSE) {
+                solde += montant;
+            } else {
+                solde -= montant;
+            }
         } else {
-            ui->tableWidget->setItem(i, 4, new QTableWidgetItem(montant));
+            if(compte.getClasse() == ACTIF || compte.getClasse() == DEPENSE) {
+                solde -= montant;
+            } else {
+                solde += montant;
+            }
         }
-        ui->tableWidget->setItem(i, 5, new QTableWidgetItem(solde));
+        ui->tableTransactionsCompte->setItem(i, 0, new QTableWidgetItem(date.toString(Qt::LocalDate)));
+        ui->tableTransactionsCompte->setItem(i, 1, new QTableWidgetItem(reference));
+        ui->tableTransactionsCompte->setItem(i, 2, new QTableWidgetItem(intitule));
+        if(type == DEBIT) {
+            ui->tableTransactionsCompte->setItem(i, 3, new QTableWidgetItem(QString::number(montant) + " €"));
+        } else {
+            ui->tableTransactionsCompte->setItem(i, 4, new QTableWidgetItem(QString::number(montant) + "€"));
+        }
+        ui->tableTransactionsCompte->setItem(i, 5, new QTableWidgetItem(QString::number(solde) + "€"));
         ++i;
     }
 }
 
 void ComptesForm::modifierAffichageCompte(const QString& nomCompte) {
-    if(ui->choixCompte->currentText() == nomCompte)
+    if(ui->choixCompte->currentText() == nomCompte) {
         chargerTable();
+        definirSolde();
+    }
 }
 
 void ComptesForm::definirSolde() {
     const CompteAbstrait& compte = manager.getCompte(ui->choixCompte->currentText());
-    ui->textSolde->setText(QString::number(compte.getSolde(), 'g', 2) + "€");
+    ui->textSolde->setText(QString::number(compte.getSolde()) + "€");
 }
 
 void ComptesForm::on_boutonAjouterCompte_clicked() {

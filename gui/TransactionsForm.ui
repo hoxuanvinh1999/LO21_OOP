@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="layoutTransaction">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="layoutActionsTransactions">
      <item>
       <widget class="QPushButton" name="boutonAjouterTransaction">
        <property name="sizePolicy">
@@ -25,10 +25,10 @@
         </sizepolicy>
        </property>
        <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
+        <cursorShape>OpenHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Ajouter un nouveau compte</string>
+        <string>Ajouter une nouvelle transaction</string>
        </property>
        <property name="styleSheet">
         <string notr="true">#boutonAjouterTransaction {
@@ -60,7 +60,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Supprimer un compte</string>
+        <string>Supprimer une transaction</string>
        </property>
        <property name="styleSheet">
         <string notr="true">#boutonSupprimerTransaction {
@@ -91,6 +91,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -111,12 +114,18 @@
        <property name="currentText">
         <string/>
        </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToContents</enum>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="tableTransaction">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
      <property name="sortingEnabled">
       <bool>false</bool>
      </property>

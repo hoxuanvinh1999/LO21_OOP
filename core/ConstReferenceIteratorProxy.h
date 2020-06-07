@@ -12,6 +12,7 @@ public:
     ConstReferenceIteratorProxy(const Container<T*>& container): container(container) {}
     iterator begin() const { return container.begin(); }
     iterator end() const { return container.end(); }
+    int size() const { return container.size(); }
 };
 
 #endif // CONSTREFERENCEITERATORPROXY_H

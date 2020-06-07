@@ -33,9 +33,9 @@ private:
     void chargerDonnees();
     void chargerComptes(const QDomDocument& doc);
     void chargerTransactions(const QDomDocument& doc);
-    void sauvegarderComptes(QDomDocument& doc) const;
+    void sauvegarderComptes(QDomDocument& doc, QDomElement& racineDoc) const;
     void sauvegarderCompteEtEnfants(QDomDocument& doc, QDomElement& comptesXml, const CompteAbstrait& compte) const;
-    void sauvegarderTransactions(QDomDocument& doc) const;
+    void sauvegarderTransactions(QDomDocument& doc, QDomElement& racineDoc) const;
     void ajouterCompte(CompteAbstrait* compte);
     CompteAbstrait& getCompteParNom(const QString& nom) const;
     void ajouterTransaction(Transaction* transaction);
@@ -43,6 +43,7 @@ private:
     void verifierOperations(const QList<Operation>& operations) const;
     void appliquerTransaction(const Transaction* transaction);
     void annulerTransaction(const Transaction* transaction);
+    void informerModificationComptes(const Transaction* transaction) const;
 
 public:
     typedef ConstReferenceIteratorProxy<QList, CompteAbstrait> comptes_iterator_proxy;
@@ -59,6 +60,8 @@ public:
     bool estSauvegarde() const { return sauvegarde; }
     bool existeCompte(const QString& nom) const { return mapComptes.contains(nom); }
     comptes_iterator_proxy comptes() const { return mapComptes.values(); }
+    comptes_iterator_proxy getComptesVirtuels() const;
+    comptes_iterator_proxy getComptesSimples() const;
     const CompteAbstrait& getCompte(const QString& nom) const { return getCompteParNom(nom); }
     bool existeTransaction(const QString& reference) const { return mapTransactions.contains(reference); }
     transactions_iterator_proxy transactions() const;
@@ -71,10 +74,10 @@ public:
     void sauvegarder();
 
 signals:
-    void compteAjoute(const QString& nomCompte);
-    void transactionAjoutee(const QString& referenceTransaction);
-    void compteModifie(const QString& nomCompte);
-    void transactionModifiee(const QString& referenceTransaction);
+    void compteAjoute(const QString& nomCompte) const;
+    void transactionAjoutee(const QString& referenceTransaction) const;
+    void compteModifie(const QString& nomCompte) const;
+    void transactionModifiee(const QString& referenceTransaction) const;
 };
 
 #endif // COMPTABILITEMANAGER_H

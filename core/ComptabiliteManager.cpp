@@ -4,6 +4,7 @@
 #include "core/TransactionException.h"
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
@@ -37,8 +38,8 @@ void ComptabiliteManager::chargerComptes(const QDomDocument& doc) {
         QDomElement compteXml = comptesXml.item(i).toElement();
         TypeCompte type = static_cast<TypeCompte>(compteXml.attribute("type").toUInt());
         bool virtuel = type == VIRTUEL;
-        QString nom = compteXml.attribute("nom");
-        QString nomParent = compteXml.attribute("parent");
+        QString nom = compteXml.attribute("nom").toUtf8();
+        QString nomParent = compteXml.attribute("parent").toUtf8();
         if(nomParent == compteRacine.getNom()) {
             ClasseCompte classe = static_cast<ClasseCompte>(compteXml.attribute("classe").toUInt());
             ajouterCompte(nom, classe, virtuel);
@@ -52,25 +53,25 @@ void ComptabiliteManager::chargerTransactions(const QDomDocument& doc) {
     QDomNodeList transactionsXml = doc.elementsByTagName("Transaction");
     for(int i = 0; i < transactionsXml.size(); ++i) {
         QDomElement transactionXml = transactionsXml.item(i).toElement();
-        QDate date = QDate::fromString(transactionXml.attribute("date"));
-        QString reference = transactionXml.attribute("reference");
-        QString intitule = transactionXml.attribute("intitule");
+        QDate date = QDate::fromString(transactionXml.attribute("date"), Qt::LocalDate);
+        QString reference = transactionXml.attribute("reference").toUtf8();
+        QString intitule = transactionXml.attribute("intitule").toUtf8();
         QList<Operation> operations;
         QDomNodeList operationsXml = transactionXml.elementsByTagName("Operation");
         for(int j = 0; j < operationsXml.size(); ++j) {
             QDomElement operationXml = operationsXml.item(j).toElement();
             double montant = operationXml.attribute("montant").toDouble();
             TypeOperation type = static_cast<TypeOperation>(operationXml.attribute("type").toUInt());
-            QString nomCompte = operationXml.attribute("compte");
+            QString nomCompte = operationXml.attribute("compte").toUtf8();
             operations.append(Operation(montant, type, nomCompte));
         }
         ajouterTransaction(date, reference, intitule, operations);
     }
 }
 
-void ComptabiliteManager::sauvegarderComptes(QDomDocument& doc) const {
+void ComptabiliteManager::sauvegarderComptes(QDomDocument& doc, QDomElement& racineDoc) const {
     QDomElement comptesXml = doc.createElement("Comptes");
-    doc.appendChild(comptesXml);
+    racineDoc.appendChild(comptesXml);
     sauvegarderCompteEtEnfants(doc, comptesXml, compteRacine);
 }
 
@@ -82,9 +83,9 @@ void ComptabiliteManager::sauvegarderCompteEtEnfants(QDomDocument& doc, QDomElem
     }
 }
 
-void ComptabiliteManager::sauvegarderTransactions(QDomDocument& doc) const {
+void ComptabiliteManager::sauvegarderTransactions(QDomDocument& doc, QDomElement& racineDoc) const {
     QDomElement transactionsXml = doc.createElement("Transactions");
-    doc.appendChild(transactionsXml);
+    racineDoc.appendChild(transactionsXml);
     for(const Transaction* transaction : mapTransactions) {
         QDomElement transactionXml = transaction->serialiser(doc);
         transactionsXml.appendChild(transactionXml);
@@ -126,6 +127,26 @@ CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nom) const {
     return *cpt;
 }
 
+ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesVirtuels() const {
+    QList<CompteAbstrait*> comptesVirtuels;
+    for(CompteAbstrait* compte : mapComptes) {
+        if(compte->getType() == VIRTUEL) {
+            comptesVirtuels.append(compte);
+        }
+    }
+    return comptesVirtuels;
+}
+
+ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimples() const {
+    QList<CompteAbstrait*> comptesSimples;
+    for(CompteAbstrait* compte : mapComptes) {
+        if(compte->getType() == SIMPLE) {
+            comptesSimples.append(compte);
+        }
+    }
+    return comptesSimples;
+}
+
 void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
     mapTransactions.insert(transaction->getReference(), transaction);
     emit transactionAjoutee(transaction->getReference());
@@ -147,7 +168,7 @@ void ComptabiliteManager::verifierOperations(const QList<Operation>& operations)
 }
 
 void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
-    for(const Operation& operation : *transaction) {
+    for(const Operation& operation : transaction->operations()) {
         double montant = operation.getMontant();
         const TypeOperation& type = operation.getType();
         CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
@@ -156,7 +177,12 @@ void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
         } else {
             compte.crediter(montant);
         }
-        emit compteModifie(compte.getNom());
+    }
+}
+
+void ComptabiliteManager::informerModificationComptes(const Transaction* transaction) const {
+    for(const Operation& operation : transaction->operations()) {
+        emit compteModifie(operation.getNomCompte());
     }
 }
 
@@ -215,6 +241,7 @@ const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, co
     Transaction* transaction = new Transaction(date, reference, intitule, operations);
     appliquerTransaction(transaction);
     ajouterTransaction(transaction);
+    informerModificationComptes(transaction);
     return *transaction;
 }
 
@@ -233,15 +260,15 @@ void ComptabiliteManager::sauvegarder() {
     if(nomFichier.isNull() || nomFichier.isEmpty())
         throw SauvegardeException("Fichier de sauvegarde non défini !");
     QFile outFile(nomFichier);
-    if(!outFile.open(QIODevice::ReadWrite))
+    if(!outFile.open(QIODevice::WriteOnly))
         throw SauvegardeException("Erreur lors de la création du fichier " + nomFichier + " !");
-    QDomDocument doc;
-    sauvegarderComptes(doc);
-    sauvegarderTransactions(doc);
+    QDomDocument doc("Comptabilite");
+    QDomElement racineDoc = doc.createElement("Comptabilite");
+    doc.appendChild(racineDoc);
+    sauvegarderComptes(doc, racineDoc);
+    sauvegarderTransactions(doc, racineDoc);
     QTextStream stream(&outFile);
     stream << doc.toString();
     outFile.close();
     sauvegarde = true;
 }
-
-

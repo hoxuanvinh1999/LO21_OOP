@@ -62,7 +62,7 @@ const Operation& Transaction::getOperation(const QString& nomCompte) const {
 
 QDomElement Transaction::serialiser(QDomDocument& doc) const {
     QDomElement transactionXml = doc.createElement("Transaction");
-    transactionXml.setAttribute("date", date.toString());
+    transactionXml.setAttribute("date", date.toString(Qt::LocalDate));
     transactionXml.setAttribute("reference", reference);
     transactionXml.setAttribute("intitule", intitule);
     for(const Operation* operation : mapOperations) {
