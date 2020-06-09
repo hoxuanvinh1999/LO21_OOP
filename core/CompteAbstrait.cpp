@@ -9,18 +9,18 @@ CompteAbstrait::CompteAbstrait(const QString& nom, const ClasseCompte& classe, C
     if(parent) {
         parent->comptesEnfants.append(this);
     }
-    qDebug() << "Construction du compte " << nom << endl;
+    qDebug() << "Construction du compte " << nom;
 }
 
 CompteAbstrait::~CompteAbstrait() {
     if(parent) {
-        parent->comptesEnfants.removeAll(this);
+        parent->comptesEnfants.removeAt(parent->comptesEnfants.indexOf(this));
     }
     for(CompteAbstrait* compteEnfant : comptesEnfants) {
         compteEnfant->parent = nullptr;
         delete compteEnfant;
     }
-    qDebug() << "Destruction du compte " << nom << endl;
+    qDebug() << "Destruction du compte " << nom;
 }
 
 QDomElement CompteAbstrait::serialiser(QDomDocument& doc) const {

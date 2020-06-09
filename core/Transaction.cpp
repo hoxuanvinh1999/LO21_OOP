@@ -1,7 +1,7 @@
 #include "Transaction.h"
 #include "TransactionException.h"
 
-Transaction::Transaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations): date(date), reference(reference), intitule(intitule), mapOperations(), figee(false) {
+Transaction::Transaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations): date(date), reference(reference), intitule(intitule), figee(false) {
     if(date.isNull() || !date.isValid())
         throw TransactionException("La date de la transaction ne peut pas être nulle ou invalide !");
     if(reference.isNull() || reference.trimmed().isEmpty())
@@ -42,11 +42,7 @@ void Transaction::verifierOperations(const QList<Operation>& operations) const {
 
 void Transaction::ajouterOperations(const QList<Operation>& operations) {
     for(const Operation& operation : operations) {
-        Operation* copieOperation = new Operation(operation);
-        const QString& nomCompte = copieOperation->getNomCompte();
-        unsigned int index = this->operations.size();
-        this->operations.append(copieOperation);
-        mapOperations.insert(nomCompte, index);
+        this->operations.append(new Operation(operation));
     }
 }
 
@@ -56,10 +52,20 @@ void Transaction::figer() {
     figee = true;
 }
 
+bool Transaction::impliqueCompte(const QString& nomCompte) const {
+    for(const Operation* operation : operations) {
+        if(operation->getNomCompte() == nomCompte)
+            return true;
+    }
+    return false;
+}
+
 const Operation& Transaction::getOperation(const QString& nomCompte) const {
-    if(!impliqueCompte(nomCompte))
-        throw TransactionException("Aucune opération n'est associée au compte " + nomCompte + " !");
-    return *operations.at(mapOperations.value(nomCompte));
+    for(const Operation* operation : operations) {
+        if(operation->getNomCompte() == nomCompte)
+            return *operation;
+    }
+    throw TransactionException("Aucune opération n'est associée au compte " + nomCompte + " !");
 }
 
 QDomElement Transaction::serialiser(QDomDocument& doc) const {

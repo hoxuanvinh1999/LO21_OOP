@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QTextCodec>
+#include <QDebug>
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
@@ -104,17 +105,19 @@ void ComptabiliteManager::ajouterCompte(CompteAbstrait* compte) {
 }
 
 void ComptabiliteManager::supprimerCompte(CompteAbstrait* compte) {
-    for(CompteAbstrait& compteEnfant : *compte) {
-        supprimerCompte(&compteEnfant);
-    }
-    for(Transaction* transaction : transactions) {
-        if(transaction->impliqueCompte(compte->getNom()))
-            supprimerTransaction(transaction);
+    if(compte->getType() == SIMPLE) {
+        for(Transaction* transaction : transactions) {
+            if(transaction->impliqueCompte(compte->getNom()))
+                supprimerTransaction(transaction);
+        }
+    } else {
+        for(CompteAbstrait& compteEnfant : *compte) {
+            supprimerCompte(&compteEnfant);
+        }
     }
     comptes.removeAt(comptes.indexOf(compte));
-    QString nomCompte = compte->getNom();
+    emit compteSupprime(compte->getNom());
     delete compte;
-    emit compteSupprime(nomCompte);
     sauvegarde = false;
 }
 
@@ -410,6 +413,10 @@ const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, co
     Transaction* transaction = new Transaction(date, reference, intitule, operations);
     ajouterTransaction(transaction);
     return *transaction;
+}
+
+const Transaction& ComptabiliteManager::modifierTransaction(const QString& referenceTransaction, const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations) {
+
 }
 
 void ComptabiliteManager::supprimerCompte(const QString& nomCompte) {

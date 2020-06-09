@@ -13,7 +13,6 @@ private:
     QString reference;
     QString intitule;
     QList<Operation*> operations;
-    QHash<QString, unsigned int> mapOperations;
     bool figee;
     void verifierOperations(const QList<Operation>& operations) const;
     void ajouterOperations(const QList<Operation>& operations);
@@ -46,8 +45,7 @@ public:
     const QString& getIntitule() const { return intitule; }
     bool estFigee() const { return figee; }
     void figer();
-    bool impliqueCompte(const QString& nomCompte) const { return mapOperations.contains(nomCompte); }
-    QList<QString> getComptesImpliques() const { return mapOperations.keys(); }
+    bool impliqueCompte(const QString& nomCompte) const;
     const Operation& getOperation(const QString& nomCompte) const;
     QDomElement serialiser(QDomDocument &doc) const override;
 };

@@ -79,6 +79,7 @@ public:
     const CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, double soldeInitial, const QString& nomCompteCapitaux);
     const CompteAbstrait& ajouterCompteCapitaux(const QString& nom, const QString& nomParent);
     const Transaction& ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations);
+    const Transaction& modifierTransaction(const QString& referenceTransaction, const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations);
     void supprimerCompte(const QString& nomCompte);
     void supprimerTransaction(const QString& referenceTransaction);
     void sauvegarder(const QString& nomFichier);
