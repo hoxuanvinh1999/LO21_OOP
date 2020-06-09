@@ -6,6 +6,3 @@
 |Xuân-vinh Ho|
 |Zhuofan Xu|
 
-test max 
-
-test encore
