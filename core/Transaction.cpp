@@ -46,6 +46,13 @@ void Transaction::ajouterOperations(const QList<Operation>& operations) {
     }
 }
 
+void Transaction::viderOperations() {
+    for(Operation* operation : operations) {
+        delete operation;
+    }
+    operations.clear();
+}
+
 void Transaction::figer() {
     if(figee)
         throw TransactionException("La transaction est déjà figée !");
@@ -66,6 +73,18 @@ const Operation& Transaction::getOperation(const QString& nomCompte) const {
             return *operation;
     }
     throw TransactionException("Aucune opération n'est associée au compte " + nomCompte + " !");
+}
+
+void Transaction::modifier(const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations) {
+    if(nouvelleDate.isNull() || !nouvelleDate.isValid())
+        throw TransactionException("La date de la transaction ne peut pas être nulle ou invalide !");
+    if(nouvelIntitule.isNull() || nouvelIntitule.trimmed().isEmpty())
+        throw TransactionException("L'intitulé de la transaction ne peut pas être vide !");
+    verifierOperations(nouvellesOperations);
+    date = nouvelleDate;
+    intitule = nouvelIntitule;
+    viderOperations();
+    ajouterOperations(nouvellesOperations);
 }
 
 QDomElement Transaction::serialiser(QDomDocument& doc) const {

@@ -235,9 +235,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="boutonModifier">
+         <widget class="QPushButton" name="boutonCorriger">
           <property name="text">
-           <string>Modifier</string>
+           <string>Corriger</string>
           </property>
          </widget>
         </item>

@@ -416,7 +416,20 @@ const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, co
 }
 
 const Transaction& ComptabiliteManager::modifierTransaction(const QString& referenceTransaction, const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations) {
-
+    Transaction& transaction = getTransactionParReference(referenceTransaction);
+    if(transaction.estFigee())
+        throw TransactionException("Une transaction figée ne peut pas être modifiée !");
+    annulerTransaction(&transaction);
+    try {
+        transaction.modifier(nouvelleDate, nouvelIntitule, nouvellesOperations);
+    } catch (const TransactionException& e) {
+        appliquerTransaction(&transaction);
+        throw e;
+    }
+    appliquerTransaction(&transaction);
+    emit transactionModifiee(transaction.getReference());
+    sauvegarde = false;
+    return transaction;
 }
 
 void ComptabiliteManager::supprimerCompte(const QString& nomCompte) {

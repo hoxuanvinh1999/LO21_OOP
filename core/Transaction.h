@@ -16,6 +16,7 @@ private:
     bool figee;
     void verifierOperations(const QList<Operation>& operations) const;
     void ajouterOperations(const QList<Operation>& operations);
+    void viderOperations();
 public:
     typedef ReferenceIterator<QList, Operation> iterator;
     typedef ConstReferenceIterator<QList, Operation> const_iterator;
@@ -47,6 +48,7 @@ public:
     void figer();
     bool impliqueCompte(const QString& nomCompte) const;
     const Operation& getOperation(const QString& nomCompte) const;
+    void modifier(const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations);
     QDomElement serialiser(QDomDocument &doc) const override;
 };
 

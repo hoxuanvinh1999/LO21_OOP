@@ -1,5 +1,6 @@
 #include "ModificationTransactionDialog.h"
 #include "ui_ModificationTransactionDialog.h"
+#include <QMessageBox>
 
 ModificationTransactionDialog::ModificationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::ModificationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms(), nbComptesSimplesExistants(manager.getComptesSimples().size()){
     ui->setupUi(this);
@@ -68,4 +69,20 @@ void ModificationTransactionDialog::on_choixTransaction_currentIndexChanged(int)
 void ModificationTransactionDialog::on_boutonAjouterOperation_clicked() {
     ajouterOperationForm(new OperationForm());
     definirEtatBoutonAjoutOperation();
+}
+
+void ModificationTransactionDialog::on_boutonCorriger_clicked() {
+    QString reference = ui->choixTransaction->currentText();
+    QDate date = ui->choixDate->date();
+    QString intitule = ui->textIntitule->text();
+    try {
+        QList<Operation> operations;
+        for(OperationForm* operationForm : operationsForms) {
+            operations.append(operationForm->getOperation());
+        }
+        manager.modifierTransaction(reference, date, intitule, operations);
+        close();
+    } catch(const exception& e) {
+        QMessageBox::critical(this, "Erreur de correction", e.what());
+    }
 }

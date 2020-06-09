@@ -25,6 +25,8 @@ private slots:
 
     void on_boutonAjouterOperation_clicked();
 
+    void on_boutonCorriger_clicked();
+
 private:
     Ui::ModificationTransactionDialog *ui;
     ComptabiliteManager& manager;
