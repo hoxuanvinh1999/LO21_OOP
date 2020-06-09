@@ -13,7 +13,7 @@ OperationForm::~OperationForm() {
 
 void OperationForm::ajouterChoixComptes() {
     ui->choixCompte->clear();
-    for(const CompteAbstrait& compte : manager.comptes()) {
+    for(const CompteAbstrait& compte : manager.getComptes()) {
         if(compte.getType() == SIMPLE) {
             ui->choixCompte->addItem(compte.getNom());
         }
@@ -23,6 +23,24 @@ void OperationForm::ajouterChoixComptes() {
 void OperationForm::setFermable(bool fermable) {
     this->fermable = fermable;
     ui->boutonFermer->setEnabled(fermable);
+}
+
+void OperationForm::setTypeOperation(const TypeOperation& typeOperation) {
+    int index = ui->choixType->findText(NomsTypeOperation[typeOperation]);
+    if(index != -1) {
+        ui->choixType->setCurrentIndex(index);
+    }
+}
+
+void OperationForm::setNomCompte(const QString& nomCompte) {
+    int index = ui->choixCompte->findText(nomCompte);
+    if(index != -1) {
+        ui->choixCompte->setCurrentIndex(index);
+    }
+}
+
+void OperationForm::setMontant(double montant) {
+    ui->choixMontant->setValue(montant);
 }
 
 void OperationForm::on_boutonFermer_clicked() {

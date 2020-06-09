@@ -1,5 +1,6 @@
 QT += widgets
 QT += xml
+QT += printsupport
 RC_ICONS = resources/icon.ico
 RESOURCES += resources.qrc
 
@@ -8,6 +9,7 @@ SOURCES += \
     core/ComptabiliteManager.cpp \
     core/Compte.cpp \
     core/CompteAbstrait.cpp \
+    core/CompteRacine.cpp \
     core/CompteVirtuel.cpp \
     core/Operation.cpp \
     core/Transaction.cpp \
@@ -15,9 +17,11 @@ SOURCES += \
     core/TypeOperation.cpp \
     gui/ComptabiliteForm.cpp \
     gui/ComptesForm.cpp \
+    gui/CreationCompteCapitauxDialog.cpp \
     gui/CreationCompteDialog.cpp \
     gui/CreationTransactionDialog.cpp \
     gui/MainWindow.cpp \
+    gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
     gui/SuppressionTransactionDialog.cpp \
     gui/TransactionsForm.cpp \
@@ -26,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     core/ClasseCompte.h \
+    core/ComparateurTransaction.h \
     core/ComptabiliteManager.h \
     core/Compte.h \
     core/CompteAbstrait.h \
@@ -45,9 +50,11 @@ HEADERS += \
     core/TypeOperation.h \
     gui/ComptabiliteForm.h \
     gui/ComptesForm.h \
+    gui/CreationCompteCapitauxDialog.h \
     gui/CreationCompteDialog.h \
     gui/CreationTransactionDialog.h \
     gui/MainWindow.h \
+    gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
     gui/SuppressionTransactionDialog.h \
     gui/TransactionsForm.h \
@@ -58,9 +65,11 @@ DISTFILES +=
 FORMS += \
     gui/ComptabiliteForm.ui \
     gui/ComptesForm.ui \
+    gui/CreationCompteCapitauxDialog.ui \
     gui/CreationCompteDialog.ui \
     gui/CreationTransactionDialog.ui \
     gui/MainWindow.ui \
+    gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \
     gui/SuppressionTransactionDialog.ui \
     gui/TransactionsForm.ui \

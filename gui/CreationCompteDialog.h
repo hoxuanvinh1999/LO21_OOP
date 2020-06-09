@@ -28,6 +28,10 @@ private slots:
 
     void on_choixClasse_currentIndexChanged(int index);
 
+    void on_boutonAjouterCompteCapitaux_clicked();
+
+    void ajouterCompteCapitaux(const QString& nomCompte);
+
 private:
     Ui::CreationCompteDialog *ui;
     ComptabiliteManager& manager;

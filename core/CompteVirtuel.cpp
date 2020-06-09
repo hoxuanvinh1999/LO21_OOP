@@ -13,3 +13,20 @@ CompteVirtuel::CompteVirtuel(const QString& nom, const ClasseCompte& classe, Com
     if(racine->getType() != RACINE)
         throw CompteException("Le parent du compte virtuel doit etre un compte racine !");
 }
+
+
+double CompteVirtuel::getSolde() const {
+    double solde = 0;
+    for(const CompteAbstrait& compteEnfant : *this) {
+        solde += compteEnfant.getSolde();
+    }
+    return solde;
+}
+
+double CompteVirtuel::getSoldeRapprochement() const {
+    double soldeRapprochement = 0;
+    for(const CompteAbstrait& compteEnfant : *this) {
+        soldeRapprochement += compteEnfant.getSoldeRapprochement();
+    }
+    return soldeRapprochement;
+}

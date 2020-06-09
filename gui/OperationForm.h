@@ -19,6 +19,9 @@ public:
 
 public slots:
     void setFermable(bool fermable);
+    void setTypeOperation(const TypeOperation& typeOperation);
+    void setNomCompte(const QString& nomCompte);
+    void setMontant(double montant);
 
 signals:
     void suppression();

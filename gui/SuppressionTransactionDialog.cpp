@@ -15,7 +15,7 @@ SuppressionTransactionDialog::~SuppressionTransactionDialog() {
 
 void SuppressionTransactionDialog::definirChoixTransactions() {
     ui->choixTransaction->clear();
-    for(const Transaction& transaction : manager.transactions()) {
+    for(const Transaction& transaction : manager.getTransactions()) {
         if(!transaction.estFigee()) {
             ui->choixTransaction->addItem(transaction.getReference());
         }

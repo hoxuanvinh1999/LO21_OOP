@@ -13,7 +13,7 @@ Transaction::Transaction(const QDate& date, const QString& reference, const QStr
 }
 
 Transaction::~Transaction() {
-    for(Operation* operation : mapOperations) {
+    for(Operation* operation : operations) {
         delete operation;
     }
 }
@@ -44,7 +44,9 @@ void Transaction::ajouterOperations(const QList<Operation>& operations) {
     for(const Operation& operation : operations) {
         Operation* copieOperation = new Operation(operation);
         const QString& nomCompte = copieOperation->getNomCompte();
-        mapOperations.insert(nomCompte, copieOperation);
+        unsigned int index = this->operations.size();
+        this->operations.append(copieOperation);
+        mapOperations.insert(nomCompte, index);
     }
 }
 
@@ -57,7 +59,7 @@ void Transaction::figer() {
 const Operation& Transaction::getOperation(const QString& nomCompte) const {
     if(!impliqueCompte(nomCompte))
         throw TransactionException("Aucune opération n'est associée au compte " + nomCompte + " !");
-    return *mapOperations.value(nomCompte);
+    return *operations.at(mapOperations.value(nomCompte));
 }
 
 QDomElement Transaction::serialiser(QDomDocument& doc) const {
@@ -65,7 +67,7 @@ QDomElement Transaction::serialiser(QDomDocument& doc) const {
     transactionXml.setAttribute("date", date.toString(Qt::LocalDate));
     transactionXml.setAttribute("reference", reference);
     transactionXml.setAttribute("intitule", intitule);
-    for(const Operation* operation : mapOperations) {
+    for(const Operation* operation : operations) {
         QDomElement operationXml = operation->serialiser(doc);
         transactionXml.appendChild(operationXml);
     }

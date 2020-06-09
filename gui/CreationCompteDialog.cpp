@@ -1,6 +1,7 @@
 #include "CreationCompteDialog.h"
 #include "ui_CreationCompteDialog.h"
 #include "core/CompteException.h"
+#include "CreationCompteCapitauxDialog.h"
 #include <QMessageBox>
 
 CreationCompteDialog::CreationCompteDialog(QWidget *parent): QDialog(parent), ui(new Ui::CreationCompteDialog), manager(ComptabiliteManager::getInstance()) {
@@ -16,7 +17,7 @@ CreationCompteDialog::~CreationCompteDialog() {
 }
 
 void CreationCompteDialog::initialiserChoixComptes() {
-    for(const CompteAbstrait& compte : manager.comptes()) {
+    for(const CompteAbstrait& compte : manager.getComptes()) {
         if(compte.getType() == VIRTUEL || compte.getType() == RACINE) {
             ui->choixCompteParent->addItem(compte.getNom());
         } else if(compte.getClasse() == PASSIF) {
@@ -32,7 +33,13 @@ void CreationCompteDialog::on_boutonFermer_clicked() {
 void CreationCompteDialog::updateGroupeSoldeInitial() {
     bool estVirtuel = ui->checkboxVirtuel->isChecked();
     ClasseCompte classe = getClasseCompte(ui->choixClasse->currentText());
-    bool afficher = !estVirtuel && (classe == ACTIF || classe == PASSIF);
+    bool afficher;
+    if(ui->choixClasse->isEnabled()) {
+         afficher = !estVirtuel && (classe == ACTIF || classe == PASSIF);
+    } else {
+        const CompteAbstrait& compteParent = manager.getCompte(ui->choixCompteParent->currentText());
+        afficher = !estVirtuel && (compteParent.getClasse() == ACTIF || compteParent.getClasse() == PASSIF);
+    }
     ui->groupSoldeInitial->setEnabled(afficher);
 }
 
@@ -60,13 +67,29 @@ void CreationCompteDialog::on_spinBoxMontant_valueChanged(double value) {
 void CreationCompteDialog::on_boutonCreer_clicked() {
     try {
         QString nomCompte = ui->textNom->text();
-        bool virtuel = ui->checkboxVirtuel->isChecked();
-        if(ui->choixClasse->isEnabled()) {
-            ClasseCompte classeCompte = getClasseCompte(ui->choixClasse->currentText());
-            manager.ajouterCompte(nomCompte, classeCompte, virtuel);
+        if(ui->groupSoldeInitial->isChecked() && ui->groupSoldeInitial->isEnabled()) {
+            QString nomCompteCapitaux = ui->choixCompteCapitaux->currentText();
+            if(nomCompteCapitaux.isNull() || nomCompteCapitaux.isEmpty()) {
+                QMessageBox::critical(this, "Erreur de création", "Vous devez créer un compte de capitaux pour le solde initial du compte !");
+                return;
+            }
+            double soldeInitial = ui->spinBoxMontant->value();
+            if(ui->choixClasse->isEnabled()) {
+                ClasseCompte classeCompte = getClasseCompte(ui->choixClasse->currentText());
+                manager.ajouterCompte(nomCompte, classeCompte, soldeInitial, nomCompteCapitaux);
+            } else {
+                QString nomParent = ui->choixCompteParent->currentText();
+                manager.ajouterCompte(nomCompte, nomParent, soldeInitial, nomCompteCapitaux);
+            }
         } else {
-            QString nomParent = ui->choixCompteParent->currentText();
-            manager.ajouterCompte(nomCompte, nomParent, virtuel);
+            bool virtuel = ui->checkboxVirtuel->isChecked();
+            if(ui->choixClasse->isEnabled()) {
+                ClasseCompte classeCompte = getClasseCompte(ui->choixClasse->currentText());
+                manager.ajouterCompte(nomCompte, classeCompte, virtuel);
+            } else {
+                QString nomParent = ui->choixCompteParent->currentText();
+                manager.ajouterCompte(nomCompte, nomParent, virtuel);
+            }
         }
         close();
     } catch(const CompteException& e) {
@@ -76,4 +99,14 @@ void CreationCompteDialog::on_boutonCreer_clicked() {
 
 void CreationCompteDialog::on_choixClasse_currentIndexChanged(int) {
     updateGroupeSoldeInitial();
+}
+
+void CreationCompteDialog::on_boutonAjouterCompteCapitaux_clicked() {
+    CreationCompteCapitauxDialog* dialog = new CreationCompteCapitauxDialog(this);
+    connect(dialog, SIGNAL(compteCapitauxCree(const QString&)), this, SLOT(ajouterCompteCapitaux(const QString&)));
+    dialog->exec();
+}
+
+void CreationCompteDialog::ajouterCompteCapitaux(const QString& nomCompte) {
+    ui->choixCompteCapitaux->addItem(nomCompte);
 }

@@ -7,27 +7,20 @@ CompteAbstrait::CompteAbstrait(const QString& nom, const ClasseCompte& classe, C
     if(nom.trimmed().isEmpty())
         throw CompteException("Le nom du compte ne peut pas être vide !");
     if(parent) {
-        parent->comptesEnfants.insert(this);
+        parent->comptesEnfants.append(this);
     }
     qDebug() << "Construction du compte " << nom << endl;
 }
 
 CompteAbstrait::~CompteAbstrait() {
     if(parent) {
-        parent->comptesEnfants.remove(this);
+        parent->comptesEnfants.removeAll(this);
     }
     for(CompteAbstrait* compteEnfant : comptesEnfants) {
+        compteEnfant->parent = nullptr;
         delete compteEnfant;
     }
     qDebug() << "Destruction du compte " << nom << endl;
-}
-
-double CompteAbstrait::getSolde() const {
-    double solde = 0;
-    for(CompteAbstrait* compteEnfant : comptesEnfants) {
-        solde += compteEnfant->getSolde();
-    }
-    return solde;
 }
 
 QDomElement CompteAbstrait::serialiser(QDomDocument& doc) const {
@@ -39,12 +32,4 @@ QDomElement CompteAbstrait::serialiser(QDomDocument& doc) const {
         cpt.setAttribute("parent", parent->getNom());
     }
     return cpt;
-}
-
-double CompteAbstrait::getSoldeRapprochement() const {
-    double soldeRapprochement = 0;
-    for(CompteAbstrait* compteEnfant : comptesEnfants) {
-        soldeRapprochement += compteEnfant->getSoldeRapprochement();
-    }
-    return soldeRapprochement;
 }

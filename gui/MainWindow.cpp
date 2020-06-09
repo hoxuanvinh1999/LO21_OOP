@@ -4,6 +4,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QPrinter>
+#include <QTextDocument>
+#include <QStack>
+#include <QPair>
+#include <sstream>
 #include "core/SauvegardeException.h"
 
 
@@ -150,7 +155,98 @@ void MainWindow::closeEvent(QCloseEvent* e) {
 }
 
 void MainWindow::on_actionGenererBilan_triggered() {
-
+    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Bilan en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
+    if(!fileName.isNull() && !fileName.isEmpty()) {
+        if(QFileInfo(fileName).suffix().isEmpty()) {
+            fileName.append(".pdf");
+        }
+        ComptabiliteManager& manager = ComptabiliteManager::getInstance();
+        QStack<QPair<int, const CompteAbstrait*>> pairesNiveauCompte;
+        for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
+            pairesNiveauCompte.push(QPair<int, const CompteAbstrait*>(0, &compteEnfant));
+        }
+        double soldeActifs = 0;
+        double soldePassifs = 0;
+        stringstream texteComptesActifs;
+        stringstream texteSoldesActifs;
+        stringstream texteComptesPassifs;
+        stringstream texteSoldesPassifs;
+        while(!pairesNiveauCompte.isEmpty()) {
+            QPair<int, const CompteAbstrait*> paire = pairesNiveauCompte.pop();
+            int niveau = paire.first;
+            const CompteAbstrait* compte = paire.second;
+            if(compte->getClasse() == ACTIF || compte->getClasse() == PASSIF) {
+                if(compte->getClasse() == ACTIF) {
+                    if(compte->getType() == SIMPLE) {
+                        soldeActifs += compte->getSolde();
+                    }
+                    for(int i = 0; i < niveau; ++i) {
+                        texteComptesActifs << "&nbsp;&nbsp;&nbsp;&nbsp;";
+                    }
+                    texteComptesActifs << compte->toString().toStdString() << "<br/>";
+                    texteSoldesActifs << QString::number(compte->getSolde(), 'f', 2).toStdString() << "€" << "<br/>";
+                } else {
+                    if(compte->getType() == SIMPLE) {
+                        soldePassifs += compte->getSolde();
+                    }
+                    for(int i = 0; i < niveau; ++i) {
+                        texteComptesPassifs << "&nbsp;&nbsp;&nbsp;&nbsp;";
+                    }
+                    texteComptesPassifs << compte->toString().toStdString() << "<br/>";
+                    texteSoldesPassifs << QString::number(compte->getSolde(), 'f', 2).toStdString() << "€" << "<br/>";
+                }
+                for(const CompteAbstrait& compteEnfant : *compte) {
+                    pairesNiveauCompte.push(QPair<int, const CompteAbstrait*>(niveau + 1, &compteEnfant));
+                }
+            }
+        }
+        texteComptesActifs << "<b>Total Actifs</b>";
+        texteSoldesActifs << "<b>" << QString::number(soldeActifs, 'f', 2).toStdString() << "€" << "</b>";
+        texteComptesPassifs << "<b>Total Passifs</b>";
+        texteSoldesPassifs << "<b>" << QString::number(soldePassifs, 'f', 2).toStdString() << "€" << "</b>";
+        double soldeActifsPassifs = soldeActifs - soldePassifs;
+        QString texteSoldeActifsPassifs = "<b>" + QString::number(soldeActifsPassifs, 'f', 2) + "€" + "</b>";
+        stringstream ss;
+        ss << "<html>";
+        ss << "  <head>";
+        ss << "    <style>";
+        ss << "      table, th, td { border: 1px solid black;} table { margin-left: auto; margin-right: auto; } body { text-align:center; }";
+        ss << "    </style>";
+        ss << "  </head>";
+        ss << "  <body>";
+        ss << "    <table>";
+        ss << "      <thead>";
+        ss << "        <tr>";
+        ss << "          <th colspan=\"2\">Bilan</th>";
+        ss << "        </tr>";
+        ss << "      </thead>";
+        ss << "      <tbody>";
+        ss << "        <tr>";
+        ss << "          <td>%0</th>";
+        ss << "          <td>%1</th>";
+        ss << "        </tr>";
+        ss << "        <tr>";
+        ss << "          <td>%2</th>";
+        ss << "          <td>%3</th>";
+        ss << "        </tr>";
+        ss << "        <tr>";
+        ss << "          <td><b>Actifs - Passifs</b></th>";
+        ss << "          <td>%4</th>";
+        ss << "        </tr>";
+        ss << "      </tbody>";
+        ss << "    </table>";
+        ss << "  </body>";
+        ss << "</html>";
+        QTextDocument doc;
+        doc.setHtml(QString::fromStdString(ss.str()).arg(QString::fromStdString(texteComptesActifs.str()), QString::fromStdString(texteSoldesActifs.str()),
+                                                         QString::fromStdString(texteComptesPassifs.str()),  QString::fromStdString(texteSoldesPassifs.str()), texteSoldeActifsPassifs));
+        QPrinter printer(QPrinter::PrinterResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setPageSize(QPrinter::A4);
+        printer.setOutputFileName(fileName);
+        printer.setPageMargins(QMarginsF(15, 15, 15, 15));
+        doc.print(&printer);
+    }
 }
 
 void MainWindow::on_actionGenererReleve_triggered() {

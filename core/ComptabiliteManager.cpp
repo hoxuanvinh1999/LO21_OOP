@@ -91,7 +91,7 @@ void ComptabiliteManager::sauvegarderCompteEtEnfants(QDomDocument& doc, QDomElem
 void ComptabiliteManager::sauvegarderTransactions(QDomDocument& doc, QDomElement& racineDoc) const {
     QDomElement transactionsXml = doc.createElement("Transactions");
     racineDoc.appendChild(transactionsXml);
-    for(const Transaction* transaction : mapTransactions) {
+    for(const Transaction* transaction : transactions) {
         QDomElement transactionXml = transaction->serialiser(doc);
         transactionsXml.appendChild(transactionXml);
     }
@@ -120,21 +120,30 @@ bool ComptabiliteManager::estInstancie() {
 }
 
 void ComptabiliteManager::ajouterCompte(CompteAbstrait* compte) {
-    mapComptes.insert(compte->getNom(), compte);
+    unsigned int index = comptes.size();
+    comptes.append(compte);
+    mapComptes.insert(compte->getNom(), index);
     emit compteAjoute(compte->getNom());
     sauvegarde = false;
 }
 
 CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nom) const {
-    CompteAbstrait* cpt = mapComptes.value(nom, nullptr);
-    if(!cpt)
+    int index = mapComptes.value(nom, -1);
+    if(index == -1)
         throw CompteException("Compte " + nom + " inexistant !");
-    return *cpt;
+    return *comptes[index];
+}
+
+void ComptabiliteManager::informerModificationCompte(const CompteAbstrait* compte) const {
+    if(compte) {
+        emit compteModifie(compte->getNom());
+        informerModificationCompte(compte->getParent());
+    }
 }
 
 ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesVirtuels() const {
     QList<CompteAbstrait*> comptesVirtuels;
-    for(CompteAbstrait* compte : mapComptes) {
+    for(CompteAbstrait* compte : comptes) {
         if(compte->getType() == VIRTUEL) {
             comptesVirtuels.append(compte);
         }
@@ -144,7 +153,7 @@ ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesVirtu
 
 ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimples() const {
     QList<CompteAbstrait*> comptesSimples;
-    for(CompteAbstrait* compte : mapComptes) {
+    for(CompteAbstrait* compte : comptes) {
         if(compte->getType() == SIMPLE) {
             comptesSimples.append(compte);
         }
@@ -153,25 +162,28 @@ ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimpl
 }
 
 void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
-    mapTransactions.insert(transaction->getReference(), transaction);
+    unsigned int index = transactions.size();
+    transactions.append(transaction);
+    mapTransactions.insert(transaction->getReference(), index);
     emit transactionAjoutee(transaction->getReference());
-    informerModificationComptes(transaction);
+    appliquerTransaction(transaction);
     sauvegarde = false;
 }
 
 void ComptabiliteManager::supprimerTransaction(Transaction* transaction) {
+    transactions.removeAt(mapTransactions.value(transaction->getReference()));
     mapTransactions.remove(transaction->getReference());
     emit transactionSupprimee(transaction->getReference());
-    informerModificationComptes(transaction);
+    annulerTransaction(transaction);
     delete transaction;
     sauvegarde = false;
 }
 
 Transaction& ComptabiliteManager::getTransactionParReference(const QString& reference) const {
-    Transaction* transac = mapTransactions.value(reference, nullptr);
-    if(!transac)
+    int index = mapTransactions.value(reference, -1);
+    if(index == -1)
         throw TransactionException("Transaction " + reference + " inexistante !");
-    return *transac;
+    return *transactions[index];
 }
 
 void ComptabiliteManager::verifierOperations(const QList<Operation>& operations) const {
@@ -182,7 +194,7 @@ void ComptabiliteManager::verifierOperations(const QList<Operation>& operations)
 }
 
 void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
-    for(const Operation& operation : transaction->operations()) {
+    for(const Operation& operation : *transaction) {
         double montant = operation.getMontant();
         const TypeOperation& type = operation.getType();
         CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
@@ -191,11 +203,12 @@ void ComptabiliteManager::appliquerTransaction(const Transaction* transaction) {
         } else {
             compte.crediter(montant);
         }
+        informerModificationCompte(&compte);
     }
 }
 
 void ComptabiliteManager::annulerTransaction(const Transaction* transaction) {
-    for(const Operation& operation : transaction->operations()) {
+    for(const Operation& operation : *transaction) {
         double montant = operation.getMontant();
         const TypeOperation& type = operation.getType();
         CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
@@ -207,10 +220,18 @@ void ComptabiliteManager::annulerTransaction(const Transaction* transaction) {
     }
 }
 
-void ComptabiliteManager::informerModificationComptes(const Transaction* transaction) const {
-    for(const Operation& operation : transaction->operations()) {
-        emit compteModifie(operation.getNomCompte());
+QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const CompteAbstrait* compte) const {
+    QSet<QString> nomComptes;
+    nomComptes.insert(compte->getNom());
+    for(const CompteAbstrait& compteEnfant : *compte) {
+        nomComptes.unite(getNomCompteEtEnfants(&compteEnfant));
     }
+    return nomComptes;
+}
+
+QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const QString& nomCompte) const {
+    CompteAbstrait& compte = getCompteParNom(nomCompte);
+    return getNomCompteEtEnfants(&compte);
 }
 
 const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
@@ -240,25 +261,82 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, con
     return *compte;
 }
 
-bool transactionsLesserCompare(const Transaction* t1, const Transaction* t2) {
-    return t1->getDate() < t2->getDate();
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, double soldeInitial, const QString& nomCompteCapitaux) {
+    if(existeCompte(nom))
+        throw CompteException("Nom de compte " + nom + " déjà utilisé !");
+    if(classe != ACTIF && classe != PASSIF)
+        throw CompteException("Un compte avec un solde initial doit être un compte de passifs et d'actifs !");
+    CompteAbstrait& compteCapitaux = getCompteParNom(nomCompteCapitaux);
+    if(compteCapitaux.getType() != SIMPLE || compteCapitaux.getClasse() != PASSIF)
+        throw CompteException("Un compte de capitaux doit être un compte de passifs !");
+    CompteAbstrait* compte = new Compte(nom, classe, &compteRacine);
+    ajouterCompte(compte);
+    int i = 1;
+    while(existeTransaction("I" + QString::number(i))) { ++i; }
+    QList<Operation> operations;
+    if(classe == ACTIF) {
+        operations.append(Operation(soldeInitial, DEBIT, nom));
+        operations.append(Operation(soldeInitial, CREDIT, nomCompteCapitaux));
+    } else {
+        operations.append(Operation(soldeInitial, CREDIT, nom));
+        operations.append(Operation(soldeInitial, DEBIT, nomCompteCapitaux));
+    }
+    Transaction* transaction = new Transaction(QDate::currentDate(), "I" + QString::number(i), "Solde initial", operations);
+    ajouterTransaction(transaction);
+    return *compte;
 }
 
-ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::transactions() const {
-    QList<Transaction*> transactions = mapTransactions.values();
-    std::stable_sort(transactions.begin(), transactions.end(), transactionsLesserCompare);
-    return transactions;
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, double soldeInitial, const QString& nomCompteCapitaux) {
+    if(existeCompte(nom))
+        throw CompteException("Nom de compte " + nom + " déjà utilisé !");
+    CompteAbstrait& compteParent = getCompteParNom(nomParent);
+    if(compteParent.getClasse() != ACTIF && compteParent.getClasse() != PASSIF)
+        throw CompteException("Un compte avec un solde initial doit être un compte de passifs et d'actifs !");
+    CompteAbstrait& compteCapitaux = getCompteParNom(nomCompteCapitaux);
+    if(compteCapitaux.getType() != SIMPLE || compteCapitaux.getClasse() != PASSIF)
+        throw CompteException("Un compte de capitaux doit être un compte de passifs !");
+    CompteAbstrait* compte = new Compte(nom, &compteParent);
+    ajouterCompte(compte);
+    int i = 1;
+    while(existeTransaction("I" + QString::number(i))) { ++i; }
+    QList<Operation> operations;
+    if(compte->getClasse() == ACTIF) {
+        operations.append(Operation(soldeInitial, DEBIT, nom));
+        operations.append(Operation(soldeInitial, CREDIT, nomCompteCapitaux));
+    } else {
+        operations.append(Operation(soldeInitial, CREDIT, nom));
+        operations.append(Operation(soldeInitial, DEBIT, nomCompteCapitaux));
+    }
+    Transaction* transaction = new Transaction(QDate::currentDate(), "I" + QString::number(i), "Solde initial", operations);
+    ajouterTransaction(transaction);
+    return *compte;
+}
+
+const CompteAbstrait& ComptabiliteManager::ajouterCompteCapitaux(const QString& nom, const QString& nomParent) {
+    if(existeCompte(nom))
+        throw CompteException("Nom de compte " + nom + " déjà utilisé !");
+    Compte* compte;
+    if(nomParent == compteRacine.getNom()) {
+        compte = new Compte(nom, PASSIF, &compteRacine);
+    } else {
+        CompteAbstrait& cptParent = getCompteParNom(nomParent);
+        if(cptParent.getClasse() != PASSIF)
+            throw CompteException("Un compte de capitaux doit être un compte de passifs !");
+        compte = new Compte(nom, &cptParent);
+    }
+    ajouterCompte(compte);
+    return *compte;
 }
 
 ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nom) const {
-    QList<Transaction*> transactions;
-    for(Transaction* transaction : mapTransactions) {
-        if(transaction->impliqueCompte(nom)) {
-            transactions.append(transaction);
+    CompteAbstrait& compte = getCompteParNom(nom);
+    QList<Transaction*> transactionsCompte;
+    for(Transaction* transaction : transactions) {
+        if(transaction->impliqueCompte(compte.getNom())) {
+            transactionsCompte.append(transaction);
         }
     }
-    std::stable_sort(transactions.begin(), transactions.end(), transactionsLesserCompare);
-    return transactions;
+    return transactionsCompte;
 }
 
 const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations) {
@@ -266,7 +344,6 @@ const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, co
         throw TransactionException("Référence de transaction " + reference + " déjà utilisé !");
     verifierOperations(operations);
     Transaction* transaction = new Transaction(date, reference, intitule, operations);
-    appliquerTransaction(transaction);
     ajouterTransaction(transaction);
     return *transaction;
 }
@@ -277,7 +354,6 @@ void ComptabiliteManager::supprimerTransaction(const QString& referenceTransacti
     Transaction& transaction = getTransactionParReference(referenceTransaction);
     if(transaction.estFigee())
         throw TransactionException("Une transaction figée ne peut pas être supprimée !");
-    annulerTransaction(&transaction);
     supprimerTransaction(&transaction);
 }
 

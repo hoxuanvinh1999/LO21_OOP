@@ -16,6 +16,14 @@
   <layout class="QVBoxLayout" name="layoutVisualiseur">
    <item>
     <widget class="QTreeWidget" name="arbreVisualiseur">
+     <property name="styleSheet">
+      <string notr="true"> QTreeView {
+     font-size: 12pt;
+ }</string>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
      <column>
       <property name="text">
        <string notr="true">1</string>

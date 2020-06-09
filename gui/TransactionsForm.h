@@ -29,6 +29,8 @@ private slots:
 
     void on_choixTransaction_currentIndexChanged(int index);
 
+    void on_boutonModifierTransaction_clicked();
+
 private:
     Ui::TransactionsForm *ui;
     ComptabiliteManager& manager;

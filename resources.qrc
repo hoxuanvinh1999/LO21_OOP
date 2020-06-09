@@ -4,5 +4,6 @@
         <file>resources/plus_button.png</file>
         <file>resources/minus_button.png</file>
         <file>resources/close_button.png</file>
+        <file>resources/modify_button.png</file>
     </qresource>
 </RCC>

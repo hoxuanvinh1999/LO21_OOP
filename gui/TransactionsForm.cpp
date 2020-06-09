@@ -2,6 +2,7 @@
 #include "ui_TransactionsForm.h"
 #include "CreationTransactionDialog.h"
 #include "SuppressionTransactionDialog.h"
+#include "ModificationTransactionDialog.h"
 #include <QMessageBox>
 
 TransactionsForm::TransactionsForm(QWidget *parent): QWidget(parent), ui(new Ui::TransactionsForm), manager(ComptabiliteManager::getInstance()) {
@@ -19,7 +20,7 @@ TransactionsForm::~TransactionsForm() {
 
 void TransactionsForm::definirChoixTransactions() {
     ui->choixTransaction->clear();
-    for(const Transaction& transaction : manager.transactions()) {
+    for(const Transaction& transaction : manager.getTransactions()) {
         ui->choixTransaction->addItem(transaction.getReference());
     }
 }
@@ -40,24 +41,23 @@ void TransactionsForm::chargerTable() {
         const QDate& date = transaction.getDate();
         const QString& reference = transaction.getReference();
         const QString& intitule = transaction.getIntitule();
-        auto operations = transaction.operations();
-        ui->tableTransaction->model()->insertRows(0, operations.size());
-        ui->tableTransaction->setItem(0, 0, new QTableWidgetItem(date.toString(Qt::LocalDate)));
-        ui->tableTransaction->setItem(0, 1, new QTableWidgetItem(reference));
-        ui->tableTransaction->setItem(0, 2, new QTableWidgetItem(intitule));
         int i = 0;
-        for(const Operation& operation : operations) {
+        for(const Operation& operation : transaction) {
+            ui->tableTransaction->insertRow(i);
             double montant = operation.getMontant();
             const TypeOperation type = operation.getType();
             const CompteAbstrait& compte = manager.getCompte(operation.getNomCompte());
             ui->tableTransaction->setItem(i, 3, new QTableWidgetItem(compte.toString()));
             if(type == DEBIT) {
-                ui->tableTransaction->setItem(i, 4, new QTableWidgetItem(QString::number(montant) + "€"));
+                ui->tableTransaction->setItem(i, 4, new QTableWidgetItem(QString::number(montant, 'f', 2) + "€"));
             } else {
-                ui->tableTransaction->setItem(i, 5, new QTableWidgetItem(QString::number(montant) + "€"));
+                ui->tableTransaction->setItem(i, 5, new QTableWidgetItem(QString::number(montant, 'f', 2) + "€"));
             }
             ++i;
         }
+        ui->tableTransaction->setItem(0, 0, new QTableWidgetItem(date.toString(Qt::LocalDate)));
+        ui->tableTransaction->setItem(0, 1, new QTableWidgetItem(reference));
+        ui->tableTransaction->setItem(0, 2, new QTableWidgetItem(intitule));
     }
 }
 
@@ -76,10 +76,35 @@ void TransactionsForm::on_boutonAjouterTransaction_clicked() {
 }
 
 void TransactionsForm::on_boutonSupprimerTransaction_clicked() {
-    SuppressionTransactionDialog* dialog = new SuppressionTransactionDialog(this);
-    dialog->exec();
+    int nbTransactionsNonFigees = 0;
+    for(const Transaction& transaction : manager.getTransactions()) {
+        if(!transaction.estFigee()) {
+            ++nbTransactionsNonFigees;
+        }
+    }
+    if(nbTransactionsNonFigees > 0) {
+        SuppressionTransactionDialog* dialog = new SuppressionTransactionDialog(this);
+        dialog->exec();
+    } else {
+        QMessageBox::critical(this, "Erreur", "Aucune transactions supprimables !");
+    }
 }
 
 void TransactionsForm::on_choixTransaction_currentIndexChanged(int) {
     chargerTable();
+}
+
+void TransactionsForm::on_boutonModifierTransaction_clicked() {
+    int nbTransactionsNonFigees = 0;
+    for(const Transaction& transaction : manager.getTransactions()) {
+        if(!transaction.estFigee()) {
+            ++nbTransactionsNonFigees;
+        }
+    }
+    if(nbTransactionsNonFigees > 0) {
+        ModificationTransactionDialog* dialog = new ModificationTransactionDialog(this);
+        dialog->exec();
+    } else {
+        QMessageBox::critical(this, "Erreur", "Aucune transactions modifiables !");
+    }
 }

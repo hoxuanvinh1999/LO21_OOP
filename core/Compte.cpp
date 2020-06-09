@@ -11,6 +11,7 @@ Compte::Compte(const QString& nom, const ClasseCompte& classe, CompteAbstrait* r
         throw CompteException("Le compte doit posseder une classe !");
     if(racine->getType() != RACINE)
         throw CompteException("Le parent du compte doit etre un compte racine !");
+
 }
 
 void Compte::crediter(double montant) {
@@ -35,7 +36,7 @@ void Compte::debiter(double montant) {
 
 QDomElement Compte::serialiser(QDomDocument& doc) const {
     QDomElement cpt = CompteAbstrait::serialiser(doc);
-    cpt.setAttribute("solde", solde);
-    cpt.setAttribute("soldeRapprochement", soldeRapprochement);
+    cpt.setAttribute("solde", QString::number(solde, 'f', 2));
+    cpt.setAttribute("soldeRapprochement", QString::number(soldeRapprochement, 'f', 2));
     return cpt;
 }

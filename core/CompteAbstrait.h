@@ -15,13 +15,13 @@ class CompteRacine;
 
 class CompteAbstrait : public ISerialisable {
 private:
-    QSet<CompteAbstrait*> comptesEnfants;
+    QList<CompteAbstrait*> comptesEnfants;
     QString nom;
     ClasseCompte classe;
     CompteAbstrait* parent;
 public:
-    typedef ReferenceIterator<QSet, CompteAbstrait> iterator;
-    typedef ConstReferenceIterator<QSet, CompteAbstrait> const_iterator;
+    typedef ReferenceIterator<QList, CompteAbstrait> iterator;
+    typedef ConstReferenceIterator<QList, CompteAbstrait> const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     iterator begin() { return comptesEnfants.begin(); }
@@ -48,10 +48,10 @@ public:
     const CompteAbstrait* getParent() const { return parent; }
     CompteAbstrait* getParent() { return parent; }
     QString toString() const { return QString(NomsClasseCompte[classe].at(0)).toUpper() + ":" + nom; }
-    virtual void debiter(double) {}
-    virtual void crediter(double) {}
-    virtual double getSolde() const;
-    virtual double getSoldeRapprochement() const;
+    virtual void debiter(double montant) = 0;
+    virtual void crediter(double montant) = 0;
+    virtual double getSolde() const = 0;
+    virtual double getSoldeRapprochement() const = 0;
     QDomElement serialiser(QDomDocument& doc) const override;
     virtual TypeCompte getType() const = 0;
 };

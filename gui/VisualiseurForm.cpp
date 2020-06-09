@@ -19,6 +19,10 @@ void VisualiseurForm::afficherArbre() {
 
 void VisualiseurForm::ajouterCompteRacine(const CompteRacine& compte) {
     QTreeWidgetItem* item = new QTreeWidgetItem(ui->arbreVisualiseur);
+    QFont font;
+    font.setBold(true);
+    font.setItalic(true);
+    item->setFont(0, font);
     item->setText(0, compte.getNom());
     for(const CompteAbstrait& compteEnfant : compte) {
         ajouterCompteEnfant(compteEnfant, item);
@@ -28,7 +32,12 @@ void VisualiseurForm::ajouterCompteRacine(const CompteRacine& compte) {
 void VisualiseurForm::ajouterCompteEnfant(const CompteAbstrait& compteEnfant, QTreeWidgetItem* parent) {
     QTreeWidgetItem* item = new QTreeWidgetItem();
     QString text = compteEnfant.toString();
-    if(compteEnfant.getType() == VIRTUEL) text += " (virtuel)";
+    if(compteEnfant.getType() == VIRTUEL) {
+        QFont font;
+        font.setBold(true);
+        item->setFont(0, font);
+        text += " (virtuel)";
+    }
     item->setText(0, text);
     for(const CompteAbstrait& compteEnfant : compteEnfant) {
         ajouterCompteEnfant(compteEnfant, item);
