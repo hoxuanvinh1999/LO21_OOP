@@ -5,6 +5,7 @@ VisualiseurForm::VisualiseurForm(QWidget *parent): QWidget(parent), ui(new Ui::V
     ui->setupUi(this);
     ui->arbreVisualiseur->setHeaderLabel("Comptes");
     connect(&manager, SIGNAL(compteAjoute(const QString&)), this, SLOT(afficherArbre()));
+    connect(&manager, SIGNAL(compteSupprime(const QString&)), this, SLOT(afficherArbre()));
     afficherArbre();
 }
 

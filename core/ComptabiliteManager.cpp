@@ -8,7 +8,7 @@
 
 ComptabiliteManager::Handler ComptabiliteManager::handler = ComptabiliteManager::Handler();
 
-ComptabiliteManager::ComptabiliteManager(const QString& nomFichier): nomFichier(nomFichier), compteRacine(), mapComptes() {
+ComptabiliteManager::ComptabiliteManager(const QString& nomFichier): nomFichier(nomFichier)  {
     ajouterCompte(&compteRacine);
     chargerDonnees();
     sauvegarde = true;
@@ -97,99 +97,77 @@ void ComptabiliteManager::sauvegarderTransactions(QDomDocument& doc, QDomElement
     }
 }
 
-ComptabiliteManager& ComptabiliteManager::charger(const QString& nomFichier) {
-    if(handler.instance)
-        throw CompteException("ComptabiliteManager est déjà instancié !");
-    handler.instance = new ComptabiliteManager(nomFichier);
-    return *handler.instance;
-}
-
-ComptabiliteManager& ComptabiliteManager::getInstance() {
-    if(!handler.instance)
-        throw CompteException("ComptabiliteManager n'est pas encore instancié !");
-    return *handler.instance;
-}
-
-void ComptabiliteManager::libererInstance() {
-    delete handler.instance;
-    handler.instance = nullptr;
-}
-
-bool ComptabiliteManager::estInstancie() {
-    return handler.instance;
-}
-
 void ComptabiliteManager::ajouterCompte(CompteAbstrait* compte) {
-    unsigned int index = comptes.size();
     comptes.append(compte);
-    mapComptes.insert(compte->getNom(), index);
     emit compteAjoute(compte->getNom());
     sauvegarde = false;
 }
 
-CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nom) const {
-    int index = mapComptes.value(nom, -1);
-    if(index == -1)
-        throw CompteException("Compte " + nom + " inexistant !");
-    return *comptes[index];
-}
-
-void ComptabiliteManager::informerModificationCompte(const CompteAbstrait* compte) const {
-    if(compte) {
-        emit compteModifie(compte->getNom());
-        informerModificationCompte(compte->getParent());
+void ComptabiliteManager::supprimerCompte(CompteAbstrait* compte) {
+    for(CompteAbstrait& compteEnfant : *compte) {
+        supprimerCompte(&compteEnfant);
     }
-}
-
-ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesVirtuels() const {
-    QList<CompteAbstrait*> comptesVirtuels;
-    for(CompteAbstrait* compte : comptes) {
-        if(compte->getType() == VIRTUEL) {
-            comptesVirtuels.append(compte);
-        }
+    for(Transaction* transaction : transactions) {
+        if(transaction->impliqueCompte(compte->getNom()))
+            supprimerTransaction(transaction);
     }
-    return comptesVirtuels;
-}
-
-ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimples() const {
-    QList<CompteAbstrait*> comptesSimples;
-    for(CompteAbstrait* compte : comptes) {
-        if(compte->getType() == SIMPLE) {
-            comptesSimples.append(compte);
-        }
-    }
-    return comptesSimples;
-}
-
-void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
-    unsigned int index = transactions.size();
-    transactions.append(transaction);
-    mapTransactions.insert(transaction->getReference(), index);
-    emit transactionAjoutee(transaction->getReference());
-    appliquerTransaction(transaction);
+    comptes.removeAt(comptes.indexOf(compte));
+    QString nomCompte = compte->getNom();
+    delete compte;
+    emit compteSupprime(nomCompte);
     sauvegarde = false;
 }
 
-void ComptabiliteManager::supprimerTransaction(Transaction* transaction) {
-    transactions.removeAt(mapTransactions.value(transaction->getReference()));
-    mapTransactions.remove(transaction->getReference());
-    emit transactionSupprimee(transaction->getReference());
-    annulerTransaction(transaction);
-    delete transaction;
-    sauvegarde = false;
+CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nomCompte) {
+    for(CompteAbstrait* compte : comptes) {
+        if(compte->getNom() == nomCompte)
+            return *compte;
+    }
+    throw CompteException("Compte " + nomCompte + " inexistant !");
 }
 
-Transaction& ComptabiliteManager::getTransactionParReference(const QString& reference) const {
-    int index = mapTransactions.value(reference, -1);
-    if(index == -1)
-        throw TransactionException("Transaction " + reference + " inexistante !");
-    return *transactions[index];
+const CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nomCompte) const {
+    for(const CompteAbstrait* compte : comptes) {
+        if(compte->getNom() == nomCompte)
+            return *compte;
+    }
+    throw CompteException("Compte " + nomCompte + " inexistant !");
+}
+
+QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const CompteAbstrait* compte) const {
+    QSet<QString> nomComptes;
+    nomComptes.insert(compte->getNom());
+    for(const CompteAbstrait& compteEnfant : *compte) {
+        nomComptes.unite(getNomCompteEtEnfants(&compteEnfant));
+    }
+    return nomComptes;
+}
+
+bool ComptabiliteManager::compteEstSupprimable(const CompteAbstrait* compte) const {
+    if(compte->getNom() == compteRacine.getNom())
+        return false;
+    for(const Transaction& transactionCompte : getTransactionsCompte(compte->getNom())) {
+        if(transactionCompte.estFigee())
+            return false;
+    }
+    for(const CompteAbstrait& compteEnfant : *compte) {
+        if(!compteEstSupprimable(&compteEnfant))
+            return false;
+    }
+    return true;
 }
 
 void ComptabiliteManager::verifierOperations(const QList<Operation>& operations) const {
     for(const Operation& operation : operations) {
         if(!existeCompte(operation.getNomCompte()))
             throw TransactionException("Le compte " + operation.getNomCompte() + " de la transaction n'existe pas !");
+    }
+}
+
+void ComptabiliteManager::informerModificationCompte(const CompteAbstrait* compte) const {
+    if(compte) {
+        emit compteModifie(compte->getNom());
+        informerModificationCompte(compte->getParent());
     }
 }
 
@@ -217,21 +195,118 @@ void ComptabiliteManager::annulerTransaction(const Transaction* transaction) {
         } else {
             compte.debiter(montant);
         }
+        informerModificationCompte(&compte);
     }
 }
 
-QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const CompteAbstrait* compte) const {
-    QSet<QString> nomComptes;
-    nomComptes.insert(compte->getNom());
-    for(const CompteAbstrait& compteEnfant : *compte) {
-        nomComptes.unite(getNomCompteEtEnfants(&compteEnfant));
+void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
+    transactions.append(transaction);
+    emit transactionAjoutee(transaction->getReference());
+    appliquerTransaction(transaction);
+    sauvegarde = false;
+}
+
+void ComptabiliteManager::supprimerTransaction(Transaction* transaction) {
+    transactions.removeAt(transactions.indexOf(transaction));
+    emit transactionSupprimee(transaction->getReference());
+    annulerTransaction(transaction);
+    delete transaction;
+    sauvegarde = false;
+}
+
+Transaction& ComptabiliteManager::getTransactionParReference(const QString& referenceTransaction) {
+    for(Transaction* transaction : transactions) {
+        if(transaction->getReference() == referenceTransaction)
+            return *transaction;
     }
-    return nomComptes;
+    throw TransactionException("Transaction " + referenceTransaction + " inexistante !");
+}
+
+const Transaction& ComptabiliteManager::getTransactionParReference(const QString& referenceTransaction) const {
+    for(const Transaction* transaction : transactions) {
+        if(transaction->getReference() == referenceTransaction)
+            return *transaction;
+    }
+    throw TransactionException("Transaction " + referenceTransaction + " inexistante !");
+}
+
+ComptabiliteManager& ComptabiliteManager::charger(const QString& nomFichier) {
+    if(handler.instance)
+        throw CompteException("ComptabiliteManager est déjà instancié !");
+    handler.instance = new ComptabiliteManager(nomFichier);
+    return *handler.instance;
+}
+
+ComptabiliteManager& ComptabiliteManager::getInstance() {
+    if(!handler.instance)
+        throw CompteException("ComptabiliteManager n'est pas encore instancié !");
+    return *handler.instance;
+}
+
+void ComptabiliteManager::libererInstance() {
+    delete handler.instance;
+    handler.instance = nullptr;
+}
+
+bool ComptabiliteManager::estInstancie() {
+    return handler.instance;
+}
+
+bool ComptabiliteManager::existeCompte(const QString& nomCompte) const {
+    for(const CompteAbstrait* compte : comptes) {
+        if(compte->getNom() == nomCompte)
+            return true;
+    }
+    return false;
 }
 
 QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const QString& nomCompte) const {
-    CompteAbstrait& compte = getCompteParNom(nomCompte);
+    const CompteAbstrait& compte = getCompteParNom(nomCompte);
     return getNomCompteEtEnfants(&compte);
+}
+
+ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesVirtuels() const {
+    QList<CompteAbstrait*> comptesVirtuels;
+    for(CompteAbstrait* compte : comptes) {
+        if(compte->getType() == VIRTUEL) {
+            comptesVirtuels.append(compte);
+        }
+    }
+    return comptesVirtuels;
+}
+
+ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptesSimples() const {
+    QList<CompteAbstrait*> comptesSimples;
+    for(CompteAbstrait* compte : comptes) {
+        if(compte->getType() == SIMPLE) {
+            comptesSimples.append(compte);
+        }
+    }
+    return comptesSimples;
+}
+
+bool ComptabiliteManager::compteEstSupprimable(const QString& nomCompte) const {
+    const CompteAbstrait& compte = getCompteParNom(nomCompte);
+    return compteEstSupprimable(&compte);
+}
+
+bool ComptabiliteManager::existeTransaction(const QString& referenceTransaction) const {
+    for(const Transaction* transaction : transactions) {
+        if(transaction->getReference() == referenceTransaction)
+            return true;
+    }
+    return false;
+}
+
+ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nomCompte) const {
+    const CompteAbstrait& compte = getCompteParNom(nomCompte);
+    QList<Transaction*> transactionsCompte;
+    for(Transaction* transaction : transactions) {
+        if(transaction->impliqueCompte(compte.getNom())) {
+            transactionsCompte.append(transaction);
+        }
+    }
+    return transactionsCompte;
 }
 
 const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
@@ -328,17 +403,6 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompteCapitaux(const QString& 
     return *compte;
 }
 
-ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nom) const {
-    CompteAbstrait& compte = getCompteParNom(nom);
-    QList<Transaction*> transactionsCompte;
-    for(Transaction* transaction : transactions) {
-        if(transaction->impliqueCompte(compte.getNom())) {
-            transactionsCompte.append(transaction);
-        }
-    }
-    return transactionsCompte;
-}
-
 const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations) {
     if(existeTransaction(reference))
         throw TransactionException("Référence de transaction " + reference + " déjà utilisé !");
@@ -348,9 +412,14 @@ const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, co
     return *transaction;
 }
 
+void ComptabiliteManager::supprimerCompte(const QString& nomCompte) {
+    CompteAbstrait& compte = getCompteParNom(nomCompte);
+    if(!compteEstSupprimable(&compte))
+        throw CompteException("Un compte avec des transactions figées n'est pas supprimable !");
+    supprimerCompte(&compte);
+}
+
 void ComptabiliteManager::supprimerTransaction(const QString& referenceTransaction) {
-    if(!existeTransaction(referenceTransaction))
-        throw TransactionException("La transaction de référence " + referenceTransaction + " n'existe pas !");
     Transaction& transaction = getTransactionParReference(referenceTransaction);
     if(transaction.estFigee())
         throw TransactionException("Une transaction figée ne peut pas être supprimée !");

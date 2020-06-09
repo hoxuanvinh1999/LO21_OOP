@@ -23,6 +23,7 @@ SOURCES += \
     gui/MainWindow.cpp \
     gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
+    gui/SuppressionCompteDialog.cpp \
     gui/SuppressionTransactionDialog.cpp \
     gui/TransactionsForm.cpp \
     gui/VisualiseurForm.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
     gui/MainWindow.h \
     gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
+    gui/SuppressionCompteDialog.h \
     gui/SuppressionTransactionDialog.h \
     gui/TransactionsForm.h \
     gui/VisualiseurForm.h
@@ -71,6 +73,7 @@ FORMS += \
     gui/MainWindow.ui \
     gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \
+    gui/SuppressionCompteDialog.ui \
     gui/SuppressionTransactionDialog.ui \
     gui/TransactionsForm.ui \
     gui/VisualiseurForm.ui

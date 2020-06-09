@@ -5,7 +5,6 @@
 SuppressionTransactionDialog::SuppressionTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::SuppressionTransactionDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-    ui->layoutChoixTransaction->setAlignment(Qt::AlignHCenter);
     definirChoixTransactions();
 }
 

@@ -2,12 +2,15 @@
 #include "ui_ComptesForm.h"
 #include <QLineEdit>
 #include "CreationCompteDialog.h"
+#include "SuppressionCompteDialog.h"
 #include "core/ComparateurTransaction.h"
+#include <QMessageBox>
 
 ComptesForm::ComptesForm(QWidget *parent): QWidget(parent), ui(new Ui::ComptesForm), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     connect(&manager, SIGNAL(compteAjoute(const QString&)), this, SLOT(ajouterChoixCompte(const QString&)));
     connect(&manager, SIGNAL(compteModifie(const QString&)), this, SLOT(modifierAffichageCompte(const QString&)));
+    connect(&manager, SIGNAL(compteSupprime(const QString&)), this, SLOT(supprimerChoixCompte(const QString&)));
     definirChoixComptes();
     chargerTable();
     definirSolde();
@@ -24,8 +27,9 @@ void ComptesForm::definirChoixComptes() {
     }
 }
 
-void ComptesForm::ajouterChoixCompte(const QString& nomCompte) {
-    ui->choixCompte->addItem(nomCompte);
+void ComptesForm::definirSolde() {
+    const CompteAbstrait& compte = manager.getCompte(ui->choixCompte->currentText());
+    ui->textSolde->setText(QString::number(compte.getSolde(), 'f', 2) + "€");
 }
 
 void ComptesForm::chargerTable() {
@@ -83,6 +87,10 @@ void ComptesForm::chargerTable() {
     }
 }
 
+void ComptesForm::ajouterChoixCompte(const QString& nomCompte) {
+    ui->choixCompte->addItem(nomCompte);
+}
+
 void ComptesForm::modifierAffichageCompte(const QString& nomCompte) {
     if(ui->choixCompte->currentText() == nomCompte) {
         chargerTable();
@@ -90,9 +98,8 @@ void ComptesForm::modifierAffichageCompte(const QString& nomCompte) {
     }
 }
 
-void ComptesForm::definirSolde() {
-    const CompteAbstrait& compte = manager.getCompte(ui->choixCompte->currentText());
-    ui->textSolde->setText(QString::number(compte.getSolde(), 'f', 2) + "€");
+void ComptesForm::supprimerChoixCompte(const QString& nomCompte) {
+    ui->choixCompte->removeItem(ui->choixCompte->findText(nomCompte));
 }
 
 void ComptesForm::on_boutonAjouterCompte_clicked() {
@@ -103,4 +110,19 @@ void ComptesForm::on_boutonAjouterCompte_clicked() {
 void ComptesForm::on_choixCompte_currentIndexChanged(int) {
     chargerTable();
     definirSolde();
+}
+
+void ComptesForm::on_boutonSupprimerCompte_clicked() {
+    int nbComptesSupprimables = 0;
+    for(const CompteAbstrait& compte : manager.getComptes()) {
+        if(manager.compteEstSupprimable(compte.getNom())) {
+            ++nbComptesSupprimables;
+        }
+    }
+    if(nbComptesSupprimables > 0) {
+        SuppressionCompteDialog* dialog = new SuppressionCompteDialog(this);
+        dialog->exec();
+    } else {
+        QMessageBox::critical(this, "Erreur", "Aucun comptes supprimables !");
+    }
 }

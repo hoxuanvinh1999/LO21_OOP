@@ -20,10 +20,14 @@ public slots:
 
     void modifierAffichageCompte(const QString& nomCompte);
 
+    void supprimerChoixCompte(const QString& nomCompte);
+
 private slots:
     void on_boutonAjouterCompte_clicked();
 
     void on_choixCompte_currentIndexChanged(int);
+
+    void on_boutonSupprimerCompte_clicked();
 
 private:
     Ui::ComptesForm *ui;
