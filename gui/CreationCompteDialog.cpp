@@ -56,6 +56,7 @@ void CreationCompteDialog::on_checkboxVirtuel_stateChanged(int) {
 
 void CreationCompteDialog::on_choixCompteParent_currentIndexChanged(int) {
     updateChoixClasse();
+    updateGroupeSoldeInitial();
 }
 
 void CreationCompteDialog::on_spinBoxMontant_valueChanged(double value) {
