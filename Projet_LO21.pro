@@ -20,6 +20,7 @@ SOURCES += \
     gui/CreationCompteCapitauxDialog.cpp \
     gui/CreationCompteDialog.cpp \
     gui/CreationTransactionDialog.cpp \
+    gui/GenerationBilanDialog.cpp \
     gui/MainWindow.cpp \
     gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
@@ -54,6 +55,7 @@ HEADERS += \
     gui/CreationCompteCapitauxDialog.h \
     gui/CreationCompteDialog.h \
     gui/CreationTransactionDialog.h \
+    gui/GenerationBilanDialog.h \
     gui/MainWindow.h \
     gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
@@ -70,6 +72,7 @@ FORMS += \
     gui/CreationCompteCapitauxDialog.ui \
     gui/CreationCompteDialog.ui \
     gui/CreationTransactionDialog.ui \
+    gui/GenerationBilanDialog.ui \
     gui/MainWindow.ui \
     gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \

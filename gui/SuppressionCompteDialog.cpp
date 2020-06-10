@@ -21,15 +21,15 @@ void SuppressionCompteDialog::definirChoixComptes() {
     }
 }
 
-void SuppressionCompteDialog::on_boutonFermerFenetre_clicked() {
-    close();
-}
-
-void SuppressionCompteDialog::on_boutonSupprimerCompte_clicked() {
+void SuppressionCompteDialog::on_boutonSupprimer_clicked() {
     try {
         manager.supprimerCompte(ui->choixCompte->currentText());
         close();
     } catch(const exception& e) {
         QMessageBox::critical(this, "Erreur de suppression", e.what());
     }
+}
+
+void SuppressionCompteDialog::on_boutonFermer_clicked() {
+    close();
 }

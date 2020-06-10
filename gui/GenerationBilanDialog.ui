@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SuppressionTransactionDialog</class>
- <widget class="QDialog" name="SuppressionTransactionDialog">
+ <class>GenerationBilanDialog</class>
+ <widget class="QDialog" name="GenerationBilanDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,9 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Suppression d'une transaction</string>
+   <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="layoutSuppressionTransaction">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <spacer name="verticalSpacer_2">
      <property name="orientation">
@@ -31,12 +31,15 @@
     </spacer>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="layoutChoixTransaction">
+    <layout class="QVBoxLayout" name="layoutChoixDate">
      <property name="spacing">
       <number>9</number>
      </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="labelChoixTransaction">
+      <widget class="QLabel" name="labelChoixDate">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -44,20 +47,17 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Transaction à supprimer :&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Date à laquelle générer le bilan :&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item alignment="Qt::AlignHCenter">
-      <widget class="QComboBox" name="choixTransaction">
+      <widget class="QDateEdit" name="choixDate">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
        </property>
       </widget>
      </item>
@@ -81,9 +81,6 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="layoutBoutons">
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -98,14 +95,26 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="boutonSupprimer">
+      <widget class="QPushButton" name="boutonGenerer">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Supprimer</string>
+        <string>Générer</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="boutonFermer">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Fermer</string>
        </property>

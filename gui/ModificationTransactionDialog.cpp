@@ -5,6 +5,7 @@
 ModificationTransactionDialog::ModificationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::ModificationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms(), nbComptesSimplesExistants(manager.getComptesSimples().size()){
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    ui->layoutOperations->setAlignment(Qt::AlignCenter);
     definirChoixTransactions();
     updateAffichageTransaction();
     definirEtatBoutonAjoutOperation();

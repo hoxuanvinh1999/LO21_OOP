@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>268</width>
-    <height>178</height>
+    <width>300</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
    <item>
     <layout class="QVBoxLayout" name="layoutChoixCompte">
      <property name="spacing">
-      <number>10</number>
+      <number>9</number>
      </property>
      <item alignment="Qt::AlignHCenter">
       <widget class="QLabel" name="labelChoixCompte">
@@ -80,7 +80,7 @@
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="layoutBoutons_2">
+    <layout class="QHBoxLayout" name="layoutBoutons">
      <property name="bottomMargin">
       <number>0</number>
      </property>
@@ -98,7 +98,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="boutonSupprimerCompte">
+      <widget class="QPushButton" name="boutonSupprimer">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -111,7 +111,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="boutonFermerFenetre">
+      <widget class="QPushButton" name="boutonFermer">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>

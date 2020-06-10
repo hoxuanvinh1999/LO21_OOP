@@ -16,9 +16,9 @@ public:
     ~SuppressionCompteDialog();
 
 private slots:
-    void on_boutonFermerFenetre_clicked();
+    void on_boutonSupprimer_clicked();
 
-    void on_boutonSupprimerCompte_clicked();
+    void on_boutonFermer_clicked();
 
 private:
     Ui::SuppressionCompteDialog *ui;
