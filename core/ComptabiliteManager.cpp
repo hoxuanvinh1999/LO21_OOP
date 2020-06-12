@@ -116,8 +116,9 @@ void ComptabiliteManager::supprimerCompte(CompteAbstrait* compte) {
         }
     }
     comptes.removeAt(comptes.indexOf(compte));
-    emit compteSupprime(compte->getNom());
+    QString nomCompte = compte->getNom();
     delete compte;
+    emit compteSupprime(nomCompte);
     sauvegarde = false;
 }
 
@@ -211,9 +212,10 @@ void ComptabiliteManager::ajouterTransaction(Transaction* transaction) {
 
 void ComptabiliteManager::supprimerTransaction(Transaction* transaction) {
     transactions.removeAt(transactions.indexOf(transaction));
-    emit transactionSupprimee(transaction->getReference());
     annulerTransaction(transaction);
+    QString referenceTransaction = transaction->getReference();
     delete transaction;
+    emit transactionSupprimee(referenceTransaction);
     sauvegarde = false;
 }
 

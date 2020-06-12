@@ -11,7 +11,7 @@ struct CompteSoldeNiveau {
     double solde;
 };
 
-double getSoldeCalculeCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; });
+double getSoldeCalculeCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; });
 
 QList<CompteSoldeNiveau> getSoldesCompteEtEnfants(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }, int niveau = 0);
 

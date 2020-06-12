@@ -39,7 +39,6 @@ void GenerationBilanDialog::on_boutonGenerer_clicked() {
                 QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, [date](const Transaction& transaction) { return transaction.getDate() <= date; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
-                int multiplieur;
                 if(compteEnfant.getClasse() == ACTIF) {
                     soldeActifs += comptesSoldeNiveau.first().solde;
                     texteComptes = &texteComptesActifs;
@@ -83,16 +82,16 @@ void GenerationBilanDialog::on_boutonGenerer_clicked() {
         ss << "      </thead>";
         ss << "      <tbody>";
         ss << "        <tr>";
-        ss << "          <td>%1</th>";
-        ss << "          <td>%2</th>";
+        ss << "          <td>%1</td>";
+        ss << "          <td>%2</td>";
         ss << "        </tr>";
         ss << "        <tr>";
-        ss << "          <td>%3</th>";
-        ss << "          <td>%4</th>";
+        ss << "          <td>%3</td>";
+        ss << "          <td>%4</td>";
         ss << "        </tr>";
         ss << "        <tr>";
-        ss << "          <td><b>Actifs - Passifs</b></th>";
-        ss << "          <td>%5</th>";
+        ss << "          <td><b>Actifs - Passifs</b></td>";
+        ss << "          <td>%5</td>";
         ss << "        </tr>";
         ss << "      </tbody>";
         ss << "    </table>";

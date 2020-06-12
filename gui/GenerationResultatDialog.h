@@ -1,19 +1,19 @@
-#ifndef GENERATIONRELEVEDIALOG_H
-#define GENERATIONRELEVEDIALOG_H
+#ifndef GENERATIONRESULTATDIALOG_H
+#define GENERATIONRESULTATDIALOG_H
 
 #include <QDialog>
 #include "core/ComptabiliteManager.h"
 
 namespace Ui {
-    class GenerationReleveDialog;
+    class GenerationResultatDialog;
 }
 
-class GenerationReleveDialog : public QDialog {
+class GenerationResultatDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit GenerationReleveDialog(QWidget *parent = nullptr);
-    ~GenerationReleveDialog();
+    explicit GenerationResultatDialog(QWidget *parent = nullptr);
+    ~GenerationResultatDialog();
 
 private slots:
     void on_boutonFermer_clicked();
@@ -25,8 +25,8 @@ private slots:
     void on_choixDateFin_userDateChanged(const QDate &date);
 
 private:
-    Ui::GenerationReleveDialog *ui;
+    Ui::GenerationResultatDialog *ui;
     ComptabiliteManager& manager;
 };
 
-#endif // GENERATIONRELEVEDIALOG_H
+#endif // GENERATIONRESULTATDIALOG_H

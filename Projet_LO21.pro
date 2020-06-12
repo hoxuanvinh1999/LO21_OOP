@@ -23,6 +23,7 @@ SOURCES += \
     gui/CreationTransactionDialog.cpp \
     gui/GenerationBilanDialog.cpp \
     gui/GenerationReleveDialog.cpp \
+    gui/GenerationResultatDialog.cpp \
     gui/MainWindow.cpp \
     gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     gui/CreationTransactionDialog.h \
     gui/GenerationBilanDialog.h \
     gui/GenerationReleveDialog.h \
+    gui/GenerationResultatDialog.h \
     gui/MainWindow.h \
     gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
@@ -78,6 +80,7 @@ FORMS += \
     gui/CreationTransactionDialog.ui \
     gui/GenerationBilanDialog.ui \
     gui/GenerationReleveDialog.ui \
+    gui/GenerationResultatDialog.ui \
     gui/MainWindow.ui \
     gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \

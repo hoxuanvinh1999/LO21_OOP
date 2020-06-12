@@ -1,12 +1,12 @@
-#include "GenerationReleveDialog.h"
-#include "ui_GenerationReleveDialog.h"
+#include "GenerationResultatDialog.h"
+#include "ui_GenerationResultatDialog.h"
 #include <QFileDialog>
 #include <QPrinter>
 #include <QTextDocument>
 #include <sstream>
 #include "core/FonctionsOutils.h"
 
-GenerationReleveDialog::GenerationReleveDialog(QWidget *parent): QDialog(parent), ui(new Ui::GenerationReleveDialog), manager(ComptabiliteManager::getInstance()) {
+GenerationResultatDialog::GenerationResultatDialog(QWidget *parent): QDialog(parent), ui(new Ui::GenerationResultatDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     ui->choixDateDebut->setDateTime(QDateTime::currentDateTime());
@@ -15,60 +15,39 @@ GenerationReleveDialog::GenerationReleveDialog(QWidget *parent): QDialog(parent)
     ui->choixDateFin->setMinimumDate(ui->choixDateDebut->date());
 }
 
-GenerationReleveDialog::~GenerationReleveDialog() {
+GenerationResultatDialog::~GenerationResultatDialog() {
     delete ui;
 }
 
-void GenerationReleveDialog::on_boutonFermer_clicked() {
+void GenerationResultatDialog::on_boutonFermer_clicked() {
     close();
 }
 
-void GenerationReleveDialog::on_boutonGenerer_clicked() {
+void GenerationResultatDialog::on_boutonGenerer_clicked() {
     QDate dateDebut = ui->choixDateDebut->date();
     QDate dateFin = ui->choixDateFin->date();
-    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Relevé en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
+    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Résultat en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
     if(!fileName.isNull() && !fileName.isEmpty()) {
         if(QFileInfo(fileName).suffix().isEmpty()) {
             fileName.append(".pdf");
         }
         double soldeRecettes = 0;
         double soldeDepenses = 0;
-        stringstream texteComptesRecettes;
-        stringstream texteSoldesRecettes;
-        stringstream texteComptesDepenses;
-        stringstream texteSoldesDepenses;
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == RECETTE || compteEnfant.getClasse() == DEPENSE) {
-                QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
-                stringstream* texteComptes;
-                stringstream* texteSoldes;
+                double soldeCompte = getSoldeCalculeCompte(compteEnfant, [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
                 if(compteEnfant.getClasse() == RECETTE) {
-                    soldeRecettes += comptesSoldeNiveau.first().solde;
-                    texteComptes = &texteComptesRecettes;
-                    texteSoldes = &texteSoldesRecettes;
+                    soldeRecettes += soldeCompte;
                 } else {
-                    soldeDepenses += comptesSoldeNiveau.first().solde;
-                    texteComptes = &texteComptesDepenses;
-                    texteSoldes = &texteSoldesDepenses;
-                }
-                for(const CompteSoldeNiveau& compteSoldeNiveau : comptesSoldeNiveau) {
-                    double soldeCompte = compteSoldeNiveau.solde;
-                    QString nomCompte = compteSoldeNiveau.compte->getNom();
-                    int niveau = compteSoldeNiveau.niveau;
-                    for(int i = 0; i < niveau; ++i) {
-                        *texteComptes << "&nbsp;&nbsp;&nbsp;&nbsp;";
-                    }
-                    *texteComptes << nomCompte.toStdString() << "<br/>";
-                    *texteSoldes << QString::number(soldeCompte, 'f', 2).toStdString() << "€" << "<br/>";
+                    soldeDepenses += soldeCompte;
                 }
             }
         }
-        texteComptesRecettes << "<b>Total Recettes</b>";
-        texteSoldesRecettes << "<b>" << QString::number(soldeRecettes, 'f', 2).toStdString() << "€" << "</b>";
-        texteComptesDepenses << "<b>Total Dépenses</b>";
-        texteSoldesDepenses << "<b>" << QString::number(soldeDepenses, 'f', 2).toStdString() << "€" << "</b>";
+        QString texteSoldesRecettes = "<b>" + QString::number(soldeRecettes, 'f', 2) + "€" + "</b>";
+        QString texteSoldesDepenses = "<b>" + QString::number(soldeDepenses, 'f', 2) + "€" + "</b>";
         double soldeRecettesDepenses = soldeRecettes - soldeDepenses;
+        QString texteResultat = "<b>" + QString::number(soldeRecettesDepenses, 'f', 2) + "€" + "</b>";
         QString texteRecettesDepenses;
         if(soldeRecettesDepenses < 0) {
             texteRecettesDepenses = "<b>Déficit</b>";
@@ -88,21 +67,25 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         ss << "    <table>";
         ss << "      <thead>";
         ss << "        <tr>";
-        ss << "          <th colspan=\"2\">Relevé du %0 au %1</th>";
+        ss << "          <th colspan=\"2\">Résultat du %0 au %1</td>";
         ss << "        </tr>";
         ss << "      </thead>";
         ss << "      <tbody>";
         ss << "        <tr>";
-        ss << "          <td>%2</td>";
+        ss << "          <td><b>Total Recettes</b></td>";
+        ss << "          <td>%2</th>";
+        ss << "        </tr>";
+        ss << "        <tr>";
+        ss << "          <td><b>Total Dépenses</b></td>";
         ss << "          <td>%3</td>";
         ss << "        </tr>";
         ss << "        <tr>";
+        ss << "          <td><b>Résultat</b></td>";
         ss << "          <td>%4</td>";
-        ss << "          <td>%5</td>";
         ss << "        </tr>";
         ss << "        <tr>";
+        ss << "          <td>%5</td>";
         ss << "          <td>%6</td>";
-        ss << "          <td>%7</td>";
         ss << "        </tr>";
         ss << "      </tbody>";
         ss << "    </table>";
@@ -111,10 +94,9 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         QTextDocument doc;
         doc.setHtml(QString::fromStdString(ss.str()).arg(dateDebut.toString(Qt::LocalDate),
                                                          dateFin.toString(Qt::LocalDate),
-                                                         QString::fromStdString(texteComptesRecettes.str()),
-                                                         QString::fromStdString(texteSoldesRecettes.str()),
-                                                         QString::fromStdString(texteComptesDepenses.str()),
-                                                         QString::fromStdString(texteSoldesDepenses.str()),
+                                                         texteSoldesRecettes,
+                                                         texteSoldesDepenses,
+                                                         texteResultat,
                                                          texteRecettesDepenses,
                                                          texteSoldeRecettesDepenses));
         QPrinter printer(QPrinter::PrinterResolution);
@@ -127,10 +109,11 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
     }
 }
 
-void GenerationReleveDialog::on_choixDateDebut_userDateChanged(const QDate& date) {
+void GenerationResultatDialog::on_choixDateDebut_userDateChanged(const QDate& date) {
     ui->choixDateFin->setMinimumDate(date);
 }
 
-void GenerationReleveDialog::on_choixDateFin_userDateChanged(const QDate& date) {
+void GenerationResultatDialog::on_choixDateFin_userDateChanged(const QDate& date) {
     ui->choixDateDebut->setMaximumDate(date);
 }
+
