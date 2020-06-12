@@ -43,7 +43,6 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
                 QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
-                int multiplieur;
                 if(compteEnfant.getClasse() == RECETTE) {
                     soldeRecettes += comptesSoldeNiveau.first().solde;
                     texteComptes = &texteComptesRecettes;
@@ -70,6 +69,13 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         texteComptesDepenses << "<b>Total Dépenses</b>";
         texteSoldesDepenses << "<b>" << QString::number(soldeDepenses, 'f', 2).toStdString() << "€" << "</b>";
         double soldeRecettesDepenses = soldeRecettes - soldeDepenses;
+        QString texteRecettesDepenses;
+        if(soldeRecettesDepenses < 0) {
+            texteRecettesDepenses = "<b>Déficit</b>";
+            soldeRecettesDepenses *= -1;
+        } else {
+            texteRecettesDepenses = "<b>Bénéfice</b>";
+        }
         QString texteSoldeRecettesDepenses = "<b>" + QString::number(soldeRecettesDepenses, 'f', 2) + "€" + "</b>";
         stringstream ss;
         ss << "<html>";
@@ -95,8 +101,8 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         ss << "          <td>%5</th>";
         ss << "        </tr>";
         ss << "        <tr>";
-        ss << "          <td><b>Recettes - Dépenses</b></th>";
         ss << "          <td>%6</th>";
+        ss << "          <td>%7</th>";
         ss << "        </tr>";
         ss << "      </tbody>";
         ss << "    </table>";
@@ -109,6 +115,7 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
                                                          QString::fromStdString(texteSoldesRecettes.str()),
                                                          QString::fromStdString(texteComptesDepenses.str()),
                                                          QString::fromStdString(texteSoldesDepenses.str()),
+                                                         texteRecettesDepenses,
                                                          texteSoldeRecettesDepenses));
         QPrinter printer(QPrinter::PrinterResolution);
         printer.setOutputFormat(QPrinter::PdfFormat);
