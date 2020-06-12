@@ -6,6 +6,7 @@
 #include <QCloseEvent>
 #include "core/SauvegardeException.h"
 #include "GenerationBilanDialog.h"
+#include "GenerationReleveDialog.h"
 
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -156,7 +157,8 @@ void MainWindow::on_actionGenererBilan_triggered() {
 }
 
 void MainWindow::on_actionGenererReleve_triggered() {
-
+    GenerationReleveDialog* dialog = new GenerationReleveDialog(this);
+    dialog->exec();
 }
 
 void MainWindow::on_actionGenererResultat_triggered() {

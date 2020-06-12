@@ -11,6 +11,7 @@ SOURCES += \
     core/CompteAbstrait.cpp \
     core/CompteRacine.cpp \
     core/CompteVirtuel.cpp \
+    core/FonctionsOutils.cpp \
     core/Operation.cpp \
     core/Transaction.cpp \
     core/TypeCompte.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
     gui/CreationCompteDialog.cpp \
     gui/CreationTransactionDialog.cpp \
     gui/GenerationBilanDialog.cpp \
+    gui/GenerationReleveDialog.cpp \
     gui/MainWindow.cpp \
     gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
@@ -41,6 +43,7 @@ HEADERS += \
     core/CompteVirtuel.h \
     core/ConstReferenceIterator.h \
     core/ConstReferenceIteratorProxy.h \
+    core/FonctionsOutils.h \
     core/ISerialisable.h \
     core/Operation.h \
     core/OperationException.h \
@@ -56,6 +59,7 @@ HEADERS += \
     gui/CreationCompteDialog.h \
     gui/CreationTransactionDialog.h \
     gui/GenerationBilanDialog.h \
+    gui/GenerationReleveDialog.h \
     gui/MainWindow.h \
     gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
@@ -73,6 +77,7 @@ FORMS += \
     gui/CreationCompteDialog.ui \
     gui/CreationTransactionDialog.ui \
     gui/GenerationBilanDialog.ui \
+    gui/GenerationReleveDialog.ui \
     gui/MainWindow.ui \
     gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \

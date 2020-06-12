@@ -4,6 +4,7 @@
 #include <QPrinter>
 #include <QTextDocument>
 #include <sstream>
+#include "core/FonctionsOutils.h"
 
 GenerationBilanDialog::GenerationBilanDialog(QWidget *parent): QDialog(parent), ui(new Ui::GenerationBilanDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
@@ -17,31 +18,6 @@ GenerationBilanDialog::~GenerationBilanDialog() {
 
 void GenerationBilanDialog::on_boutonFermer_clicked() {
     close();
-}
-
-QList<CompteSoldeNiveau> GenerationBilanDialog::getSoldesCompteEtEnfants(const CompteAbstrait& compte, const QDate& dateMax, int niveau) {
-    QList<CompteSoldeNiveau> soldesComptes;
-    double soldeCompte = 0;
-    if(compte.getType() == SIMPLE) {
-        for(const Transaction& transaction : manager.getTransactionsCompte(compte.getNom())) {
-            if(transaction.getDate() <= dateMax) {
-                const Operation& operation = transaction.getOperation(compte.getNom());
-                if(operation.getType() == DEBIT) {
-                    soldeCompte += operation.getMontant();
-                } else {
-                    soldeCompte -= operation.getMontant();
-                }
-            }
-        }
-    } else {
-        for(const CompteAbstrait& compteEnfant : compte) {
-            QList<CompteSoldeNiveau> soldesComptesEnfants = getSoldesCompteEtEnfants(compteEnfant, dateMax, niveau + 1);
-            soldeCompte += soldesComptesEnfants.first().solde;
-            soldesComptes.append(soldesComptesEnfants);
-        }
-    }
-    soldesComptes.push_front({compte.toString(), niveau, soldeCompte});
-    return soldesComptes;
 }
 
 void GenerationBilanDialog::on_boutonGenerer_clicked() {
@@ -60,7 +36,7 @@ void GenerationBilanDialog::on_boutonGenerer_clicked() {
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == ACTIF || compteEnfant.getClasse() == PASSIF) {
-                QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, date, 0);
+                QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, [date](const Transaction& transaction) { return transaction.getDate() <= date; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
                 int multiplieur;
@@ -68,16 +44,14 @@ void GenerationBilanDialog::on_boutonGenerer_clicked() {
                     soldeActifs += comptesSoldeNiveau.first().solde;
                     texteComptes = &texteComptesActifs;
                     texteSoldes = &texteSoldesActifs;
-                    multiplieur = 1;
                 } else {
-                    soldePassifs -= comptesSoldeNiveau.first().solde;
+                    soldePassifs += comptesSoldeNiveau.first().solde;
                     texteComptes = &texteComptesPassifs;
                     texteSoldes = &texteSoldesPassifs;
-                    multiplieur = -1;
                 }
                 for(const CompteSoldeNiveau& compteSoldeNiveau : comptesSoldeNiveau) {
-                    double soldeCompte = compteSoldeNiveau.solde * multiplieur;
-                    QString nomCompte = compteSoldeNiveau.nomCompte;
+                    double soldeCompte = compteSoldeNiveau.solde;
+                    QString nomCompte = compteSoldeNiveau.compte->getNom();
                     int niveau = compteSoldeNiveau.niveau;
                     for(int i = 0; i < niveau; ++i) {
                         *texteComptes << "&nbsp;&nbsp;&nbsp;&nbsp;";
