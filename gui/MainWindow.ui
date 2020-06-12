@@ -45,6 +45,7 @@
     <property name="title">
      <string>Édition</string>
     </property>
+    <addaction name="actionCloturerLivre"/>
     <addaction name="actionGenererBilan"/>
     <addaction name="actionGenererReleve"/>
     <addaction name="actionGenererResultat"/>
@@ -141,6 +142,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+R</string>
+   </property>
+  </action>
+  <action name="actionCloturerLivre">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Clôturer le livre</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
    </property>
   </action>
  </widget>

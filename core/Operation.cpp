@@ -2,8 +2,8 @@
 #include "OperationException.h"
 
 Operation::Operation(double montant, const TypeOperation& type, const QString& nomCompte): montant(montant), type(type), nomCompte(nomCompte) {
-    if(montant <= 0)
-        throw OperationException("Le montant de l'opération ne peut pas être négatif ou nul !");
+    if(montant < 0)
+        throw OperationException("Le montant de l'opération ne peut pas être négatif !");
 }
 
 QDomElement Operation::serialiser(QDomDocument& doc) const {

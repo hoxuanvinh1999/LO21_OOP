@@ -34,6 +34,8 @@ private slots:
 
     void on_actionGenererResultat_triggered();
 
+    void on_actionCloturerLivre_triggered();
+
 protected slots:
     void closeEvent(QCloseEvent* e) override;
 

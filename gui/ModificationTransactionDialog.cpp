@@ -2,8 +2,9 @@
 #include "ui_ModificationTransactionDialog.h"
 #include <QMessageBox>
 
-ModificationTransactionDialog::ModificationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::ModificationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms(), nbComptesSimplesExistants(manager.getComptesSimples().size()){
+ModificationTransactionDialog::ModificationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::ModificationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms() {
     ui->setupUi(this);
+    nbComptesSimplesExistants = manager.getComptes([](const CompteAbstrait& compte) { return compte.getType() == SIMPLE; }).size();
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     ui->layoutOperations->setAlignment(Qt::AlignCenter);
     definirChoixTransactions();

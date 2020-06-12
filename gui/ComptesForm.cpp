@@ -4,6 +4,7 @@
 #include "CreationCompteDialog.h"
 #include "SuppressionCompteDialog.h"
 #include "core/ComparateurTransaction.h"
+#include <QDebug>
 #include <QMessageBox>
 
 ComptesForm::ComptesForm(QWidget *parent): QWidget(parent), ui(new Ui::ComptesForm), manager(ComptabiliteManager::getInstance()) {

@@ -1,8 +1,12 @@
 #include "CreationTransactionDialog.h"
 #include "ui_CreationTransactionDialog.h"
+#include "core/TransactionException.h"
 #include <QMessageBox>
 
-CreationTransactionDialog::CreationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::CreationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms(), nbComptesSimplesExistants(manager.getComptesSimples().size()) {
+CreationTransactionDialog::CreationTransactionDialog(QWidget *parent): QDialog(parent), ui(new Ui::CreationTransactionDialog), manager(ComptabiliteManager::getInstance()), operationsForms() {
+    nbComptesSimplesExistants = manager.getComptes([](const CompteAbstrait& compte) { return compte.getType() == SIMPLE; }).size();
+    if(nbComptesSimplesExistants < 2)
+        throw TransactionException("Il vous faut au minimum 2 comptes créés pour pouvoir effectuer un transfert !");
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     ui->choixDate->setDateTime(QDateTime::currentDateTime());

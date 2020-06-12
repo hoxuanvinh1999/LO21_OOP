@@ -4,7 +4,6 @@
 #include <QPrinter>
 #include <QTextDocument>
 #include <sstream>
-#include "core/FonctionsOutils.h"
 
 GenerationResultatDialog::GenerationResultatDialog(QWidget *parent): QDialog(parent), ui(new Ui::GenerationResultatDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
@@ -26,17 +25,17 @@ void GenerationResultatDialog::on_boutonFermer_clicked() {
 void GenerationResultatDialog::on_boutonGenerer_clicked() {
     QDate dateDebut = ui->choixDateDebut->date();
     QDate dateFin = ui->choixDateFin->date();
-    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Résultat en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
-    if(!fileName.isNull() && !fileName.isEmpty()) {
-        if(QFileInfo(fileName).suffix().isEmpty()) {
-            fileName.append(".pdf");
+    QString nomFichier = QFileDialog::getSaveFileName(this, "Exporter Résultat en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
+    if(!nomFichier.isNull() && !nomFichier.isEmpty()) {
+        if(QFileInfo(nomFichier).suffix().isEmpty()) {
+            nomFichier.append(".pdf");
         }
         double soldeRecettes = 0;
         double soldeDepenses = 0;
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == RECETTE || compteEnfant.getClasse() == DEPENSE) {
-                double soldeCompte = getSoldeCalculeCompte(compteEnfant, [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
+                double soldeCompte = manager.getSoldeCalculeCompte(compteEnfant.getNom(), [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
                 if(compteEnfant.getClasse() == RECETTE) {
                     soldeRecettes += soldeCompte;
                 } else {
@@ -102,7 +101,7 @@ void GenerationResultatDialog::on_boutonGenerer_clicked() {
         QPrinter printer(QPrinter::PrinterResolution);
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setPageSize(QPrinter::A4);
-        printer.setOutputFileName(fileName);
+        printer.setOutputFileName(nomFichier);
         printer.setPageMargins(QMarginsF(15, 15, 15, 15));
         doc.print(&printer);
         close();

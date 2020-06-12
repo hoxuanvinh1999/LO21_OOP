@@ -4,7 +4,6 @@
 #include <QPrinter>
 #include <QTextDocument>
 #include <sstream>
-#include "core/FonctionsOutils.h"
 
 GenerationReleveDialog::GenerationReleveDialog(QWidget *parent): QDialog(parent), ui(new Ui::GenerationReleveDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
@@ -26,10 +25,10 @@ void GenerationReleveDialog::on_boutonFermer_clicked() {
 void GenerationReleveDialog::on_boutonGenerer_clicked() {
     QDate dateDebut = ui->choixDateDebut->date();
     QDate dateFin = ui->choixDateFin->date();
-    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Relevé en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
-    if(!fileName.isNull() && !fileName.isEmpty()) {
-        if(QFileInfo(fileName).suffix().isEmpty()) {
-            fileName.append(".pdf");
+    QString nomFichier = QFileDialog::getSaveFileName(this, "Exporter Relevé en PDF", "", "Fichier PDF (*.pdf);;Tout fichier (*)");
+    if(!nomFichier.isNull() && !nomFichier.isEmpty()) {
+        if(QFileInfo(nomFichier).suffix().isEmpty()) {
+            nomFichier.append(".pdf");
         }
         double soldeRecettes = 0;
         double soldeDepenses = 0;
@@ -40,23 +39,24 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == RECETTE || compteEnfant.getClasse() == DEPENSE) {
-                QList<CompteSoldeNiveau> comptesSoldeNiveau = getSoldesCompteEtEnfants(compteEnfant, [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
+                QList<CompteSoldeStruct> comptesSolde = manager.getSoldesCalculesCompteEtEnfants(compteEnfant.getNom(), [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
                 if(compteEnfant.getClasse() == RECETTE) {
-                    soldeRecettes += comptesSoldeNiveau.first().solde;
+                    soldeRecettes += comptesSolde.first().solde;
                     texteComptes = &texteComptesRecettes;
                     texteSoldes = &texteSoldesRecettes;
                 } else {
-                    soldeDepenses += comptesSoldeNiveau.first().solde;
+                    soldeDepenses += comptesSolde.first().solde;
                     texteComptes = &texteComptesDepenses;
                     texteSoldes = &texteSoldesDepenses;
                 }
-                for(const CompteSoldeNiveau& compteSoldeNiveau : comptesSoldeNiveau) {
-                    double soldeCompte = compteSoldeNiveau.solde;
-                    QString nomCompte = compteSoldeNiveau.compte->getNom();
-                    int niveau = compteSoldeNiveau.niveau;
-                    for(int i = 0; i < niveau; ++i) {
+                for(const CompteSoldeStruct& compteSolde : comptesSolde) {
+                    double soldeCompte = compteSolde.solde;
+                    QString nomCompte = compteSolde.nomCompte;
+                    const CompteAbstrait& compte = manager.getCompte(nomCompte);
+                    int niveau = compte.getNiveauProfondeur();
+                    for(int i = 1; i < niveau; ++i) {
                         *texteComptes << "&nbsp;&nbsp;&nbsp;&nbsp;";
                     }
                     *texteComptes << nomCompte.toStdString() << "<br/>";
@@ -120,7 +120,7 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         QPrinter printer(QPrinter::PrinterResolution);
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setPageSize(QPrinter::A4);
-        printer.setOutputFileName(fileName);
+        printer.setOutputFileName(nomFichier);
         printer.setPageMargins(QMarginsF(15, 15, 15, 15));
         doc.print(&printer);
         close();

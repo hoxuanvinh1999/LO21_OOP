@@ -8,7 +8,7 @@
 #include "GenerationBilanDialog.h"
 #include "GenerationReleveDialog.h"
 #include "GenerationResultatDialog.h"
-
+#include "core/TransactionException.h"
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -25,6 +25,7 @@ bool MainWindow::fermerSessionActuelle() {
     ui->actionSauvegarder->setEnabled(false);
     ui->actionSauvegarderEnTantQue->setEnabled(false);
     ui->actionFermerSession->setEnabled(false);
+    ui->actionCloturerLivre->setEnabled(false);
     ui->actionGenererBilan->setEnabled(false);
     ui->actionGenererReleve->setEnabled(false);
     ui->actionGenererResultat->setEnabled(false);
@@ -38,6 +39,7 @@ void MainWindow::ouvrirNouvelleSession(const QString& filename) {
     ui->actionSauvegarder->setEnabled(true);
     ui->actionSauvegarderEnTantQue->setEnabled(true);
     ui->actionFermerSession->setEnabled(true);
+    ui->actionCloturerLivre->setEnabled(true);
     ui->actionGenererBilan->setEnabled(true);
     ui->actionGenererReleve->setEnabled(true);
     ui->actionGenererResultat->setEnabled(true);
@@ -165,4 +167,18 @@ void MainWindow::on_actionGenererReleve_triggered() {
 void MainWindow::on_actionGenererResultat_triggered() {
     GenerationResultatDialog* dialog = new GenerationResultatDialog(this);
     dialog->exec();
+}
+
+void MainWindow::on_actionCloturerLivre_triggered() {
+    QMessageBox msgBox(QMessageBox::Warning, "Effectuer la clôture du livre", "Confirmez vous la clôture du livre ?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Oui");
+    msgBox.setButtonText(QMessageBox::No, "Non");
+    QMessageBox::StandardButton reponse = static_cast<QMessageBox::StandardButton>(msgBox.exec());
+    if(reponse == QMessageBox::Yes) {
+        try {
+            ComptabiliteManager::getInstance().effectuerCloture();
+        } catch (const TransactionException& e) {
+            QMessageBox::warning(this, "Erreur", e.what());
+        }
+    }
 }

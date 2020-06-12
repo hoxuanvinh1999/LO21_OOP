@@ -3,6 +3,7 @@
 #include "CreationTransactionDialog.h"
 #include "SuppressionTransactionDialog.h"
 #include "ModificationTransactionDialog.h"
+#include "core/TransactionException.h"
 #include <QMessageBox>
 
 TransactionsForm::TransactionsForm(QWidget *parent): QWidget(parent), ui(new Ui::TransactionsForm), manager(ComptabiliteManager::getInstance()) {
@@ -67,11 +68,11 @@ void TransactionsForm::modifierAffichageTransaction(const QString& referenceTran
 }
 
 void TransactionsForm::on_boutonAjouterTransaction_clicked() {
-    if(manager.getComptesSimples().size() >= 2) {
+    try {
         CreationTransactionDialog* dialog = new CreationTransactionDialog(this);
         dialog->exec();
-    } else {
-        QMessageBox::critical(this, "Erreur", "Il vous faut au minimum 2 comptes créés pour pouvoir effectuer un transfert !");
+    } catch(const TransactionException& e) {
+        QMessageBox::critical(this, "Erreur", e.what());
     }
 }
 

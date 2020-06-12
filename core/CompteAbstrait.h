@@ -47,6 +47,7 @@ public:
     const ClasseCompte& getClasse() const { return classe; }
     const CompteAbstrait* getParent() const { return parent; }
     CompteAbstrait* getParent() { return parent; }
+    int getNiveauProfondeur() const { return (parent ? parent->getNiveauProfondeur() + 1 : 0); }
     QString toString() const { return QString(NomsClasseCompte[classe].at(0)).toUpper() + ":" + nom; }
     virtual void debiter(double montant) = 0;
     virtual void crediter(double montant) = 0;

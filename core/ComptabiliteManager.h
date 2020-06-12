@@ -11,6 +11,11 @@
 #include "Transaction.h"
 #include "ConstReferenceIteratorProxy.h"
 
+struct CompteSoldeStruct {
+    QString nomCompte;
+    double solde;
+};
+
 
 class ComptabiliteManager : public QObject {
 
@@ -49,6 +54,8 @@ private:
     void supprimerTransaction(Transaction* transaction);
     Transaction& getTransactionParReference(const QString& referenceTransaction);
     const Transaction& getTransactionParReference(const QString& referenceTransaction) const;
+    double getSoldeCalculeCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
+    QList<CompteSoldeStruct> getSoldesCalculesCompteEtEnfants(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
 public:
     typedef ConstReferenceIteratorProxy<QList, CompteAbstrait> comptes_iterator_proxy;
     typedef ConstReferenceIteratorProxy<QList, Transaction> transactions_iterator_proxy;
@@ -65,14 +72,12 @@ public:
     bool existeCompte(const QString& nom) const;
     QSet<QString> getNomCompteEtEnfants(const QString& nomCompte) const;
     const CompteAbstrait& getCompte(const QString& nomCompte) const { return getCompteParNom(nomCompte); }
-    comptes_iterator_proxy getComptes() const { return comptes; }
-    comptes_iterator_proxy getComptesVirtuels() const;
-    comptes_iterator_proxy getComptesSimples() const;
+    comptes_iterator_proxy getComptes(const function<bool(const CompteAbstrait&)>& filtreurComptes = [](const CompteAbstrait&) { return true; }) const;
     bool compteEstSupprimable(const QString& nomCompte) const;
     bool existeTransaction(const QString& referenceTransaction) const;
     const Transaction& getTransaction(const QString& reference) const { return getTransactionParReference(reference); }
-    transactions_iterator_proxy getTransactions() const { return transactions; }
-    transactions_iterator_proxy getTransactionsCompte(const QString& nomCompte) const;
+    transactions_iterator_proxy getTransactions(const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
+    transactions_iterator_proxy getTransactionsCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
     const CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel);
     const CompteAbstrait& ajouterCompte(const QString& nom, const QString& nomParent, bool virtuel);
     const CompteAbstrait& ajouterCompte(const QString& nom, const ClasseCompte& classe, double soldeInitial, const QString& nomCompteCapitaux);
@@ -82,6 +87,9 @@ public:
     const Transaction& modifierTransaction(const QString& referenceTransaction, const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations);
     void supprimerCompte(const QString& nomCompte);
     void supprimerTransaction(const QString& referenceTransaction);
+    double getSoldeCalculeCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
+    QList<CompteSoldeStruct> getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
+    void effectuerCloture();
     void sauvegarder(const QString& nomFichier);
     void sauvegarder();
 
