@@ -3,6 +3,7 @@
 #include <QLineEdit>
 #include "CreationCompteDialog.h"
 #include "SuppressionCompteDialog.h"
+#include "RapprochementCompteDialog.h"
 #include "core/ComparateurTransaction.h"
 #include <QMessageBox>
 
@@ -136,4 +137,9 @@ void ComptesForm::on_boutonSupprimerCompte_clicked() {
     } else {
         QMessageBox::critical(this, "Erreur", "Aucun comptes supprimables !");
     }
+}
+
+void ComptesForm::on_boutonRapprocherCompte_clicked() {
+    RapprochementCompteDialog* dialog = new RapprochementCompteDialog(this);
+    dialog->exec();
 }

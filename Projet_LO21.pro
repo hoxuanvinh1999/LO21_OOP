@@ -27,6 +27,7 @@ SOURCES += \
     gui/MainWindow.cpp \
     gui/ModificationTransactionDialog.cpp \
     gui/OperationForm.cpp \
+    gui/RapprochementCompteDialog.cpp \
     gui/SuppressionCompteDialog.cpp \
     gui/SuppressionTransactionDialog.cpp \
     gui/TransactionsForm.cpp \
@@ -66,6 +67,7 @@ HEADERS += \
     gui/MainWindow.h \
     gui/ModificationTransactionDialog.h \
     gui/OperationForm.h \
+    gui/RapprochementCompteDialog.h \
     gui/SuppressionCompteDialog.h \
     gui/SuppressionTransactionDialog.h \
     gui/TransactionsForm.h \
@@ -85,6 +87,7 @@ FORMS += \
     gui/MainWindow.ui \
     gui/ModificationTransactionDialog.ui \
     gui/OperationForm.ui \
+    gui/RapprochementCompteDialog.ui \
     gui/SuppressionCompteDialog.ui \
     gui/SuppressionTransactionDialog.ui \
     gui/TransactionsForm.ui \

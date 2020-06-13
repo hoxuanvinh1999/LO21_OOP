@@ -22,11 +22,3 @@ double CompteVirtuel::getSolde() const {
     }
     return solde;
 }
-
-double CompteVirtuel::getSoldeRapprochement() const {
-    double soldeRapprochement = 0;
-    for(const CompteAbstrait& compteEnfant : *this) {
-        soldeRapprochement += compteEnfant.getSoldeRapprochement();
-    }
-    return soldeRapprochement;
-}

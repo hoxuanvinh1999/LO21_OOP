@@ -46,7 +46,7 @@ private:
     const CompteAbstrait& getCompteParNom(const QString& nomCompte) const;
     QSet<QString> getNomCompteEtEnfants(const CompteAbstrait* compte) const;
     bool compteEstSupprimable(const CompteAbstrait* compte) const;
-    void verifierOperations(const QList<Operation>& operations) const;
+    void verifierOperationsEtDateTransaction(const QList<Operation>& operations, const QDate& date) const;
     void informerModificationCompte(const CompteAbstrait* compte) const;
     void appliquerTransaction(const Transaction* transaction);
     void annulerTransaction(const Transaction* transaction);
@@ -57,8 +57,8 @@ private:
     double getSoldeCalculeCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
     QList<CompteSoldeStruct> getSoldesCalculesCompteEtEnfants(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
 public:
-    typedef ConstReferenceIteratorProxy<QList, CompteAbstrait> comptes_iterator_proxy;
-    typedef ConstReferenceIteratorProxy<QList, Transaction> transactions_iterator_proxy;
+    using comptes_iterator_proxy = ConstReferenceIteratorProxy<QList<CompteAbstrait*>>;
+    using transactions_iterator_proxy = ConstReferenceIteratorProxy<QList<Transaction*>>;
     ComptabiliteManager() = delete;
     ComptabiliteManager(const ComptabiliteManager&) = delete;
     ComptabiliteManager& operator=(const ComptabiliteManager&) = delete;

@@ -32,6 +32,8 @@ private slots:
 
     void on_boutonSupprimerCompte_clicked();
 
+    void on_boutonRapprocherCompte_clicked();
+
 private:
     Ui::ComptesForm *ui;
     ComptabiliteManager& manager;

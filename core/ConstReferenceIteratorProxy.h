@@ -3,13 +3,14 @@
 
 #include "ConstReferenceIterator.h"
 
-template<template <typename> class Container, typename T>
+template<typename Container>
 class ConstReferenceIteratorProxy {
 private:
-    const Container<T*> container;
+    const Container container;
 public:
-    typedef ConstReferenceIterator<Container, T> iterator;
-    ConstReferenceIteratorProxy(const Container<T*>& container): container(container) {}
+    using iterator = ConstReferenceIterator<Container>;
+    ConstReferenceIteratorProxy() = delete;
+    ConstReferenceIteratorProxy(const Container& container): container(container) {}
     iterator begin() const { return container.begin(); }
     iterator end() const { return container.end(); }
     int size() const { return container.size(); }

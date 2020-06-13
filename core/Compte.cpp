@@ -1,12 +1,12 @@
 #include "Compte.h"
 #include "CompteException.h"
 
-Compte::Compte(const QString& nom, CompteAbstrait* parent): CompteAbstrait(nom, parent->getClasse(), parent), solde(0), soldeRapprochement(0) {
+Compte::Compte(const QString& nom, CompteAbstrait* parent): CompteAbstrait(nom, parent->getClasse(), parent), solde(0) {
     if(parent->getType() != VIRTUEL)
         throw CompteException("Le parent du compte doit etre un compte virtuel !");
 }
 
-Compte::Compte(const QString& nom, const ClasseCompte& classe, CompteAbstrait* racine): CompteAbstrait(nom, classe, racine), solde(0), soldeRapprochement(0) {
+Compte::Compte(const QString& nom, const ClasseCompte& classe, CompteAbstrait* racine): CompteAbstrait(nom, classe, racine), solde(0) {
     if(classe == AUCUN)
         throw CompteException("Le compte doit posseder une classe !");
     if(racine->getType() != RACINE)
@@ -35,8 +35,7 @@ void Compte::debiter(double montant) {
 }
 
 QDomElement Compte::serialiser(QDomDocument& doc) const {
-    QDomElement cpt = CompteAbstrait::serialiser(doc);
-    cpt.setAttribute("solde", QString::number(solde, 'f', 2));
-    cpt.setAttribute("soldeRapprochement", QString::number(soldeRapprochement, 'f', 2));
-    return cpt;
+    QDomElement compteXml = CompteAbstrait::serialiser(doc);
+    compteXml.setAttribute("solde", QString::number(solde, 'f', 2));
+    return compteXml;
 }

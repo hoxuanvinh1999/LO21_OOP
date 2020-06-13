@@ -10,7 +10,6 @@ public:
     CompteRacine(): CompteAbstrait("Compte racine", AUCUN) {}
     TypeCompte getType() const override { return RACINE; }
     double getSolde() const override;
-    double getSoldeRapprochement() const override;
     void debiter(double) override { throw CompteException("Un compte racine ne peut être débité !"); }
     void crediter(double) override { throw CompteException("Un compte racine ne peut être crédité !"); }
 };

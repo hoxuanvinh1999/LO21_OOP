@@ -51,6 +51,10 @@ void ComptabiliteManager::chargerComptes(const QDomDocument& doc) {
         } else {
             ajouterCompte(nom, nomParent, virtuel);
         }
+        QDate dateDernierRapprochement = QDate::fromString(compteXml.attribute("date_dernier_rapprochement"), Qt::LocalDate);
+        double soldeDernierRapprochement = compteXml.attribute("solder_dernier_rapprochement").toDouble();
+        CompteAbstrait& compte = getCompteParNom(nom);
+        compte.rapprocher(dateDernierRapprochement, soldeDernierRapprochement);
     }
 }
 
@@ -160,10 +164,13 @@ bool ComptabiliteManager::compteEstSupprimable(const CompteAbstrait* compte) con
     return true;
 }
 
-void ComptabiliteManager::verifierOperations(const QList<Operation>& operations) const {
+void ComptabiliteManager::verifierOperationsEtDateTransaction(const QList<Operation>& operations, const QDate& date) const {
     for(const Operation& operation : operations) {
         if(!existeCompte(operation.getNomCompte()))
             throw TransactionException("Le compte " + operation.getNomCompte() + " de la transaction n'existe pas !");
+        const CompteAbstrait& compte = getCompteParNom(operation.getNomCompte());
+        if(!compte.getDateDernierRapprochement().isNull() && date < compte.getDateDernierRapprochement())
+            throw TransactionException("Le compte " + operation.getNomCompte() + " est rapproché à la date " + date.toString(Qt::LocalDate) + " !");
     }
 }
 
@@ -448,7 +455,7 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompteCapitaux(const QString& 
 const Transaction& ComptabiliteManager::ajouterTransaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations) {
     if(existeTransaction(reference))
         throw TransactionException("Référence de transaction " + reference + " déjà utilisé !");
-    verifierOperations(operations);
+    verifierOperationsEtDateTransaction(operations, date);
     Transaction* transaction = new Transaction(date, reference, intitule, operations);
     ajouterTransaction(transaction);
     return *transaction;
@@ -458,6 +465,7 @@ const Transaction& ComptabiliteManager::modifierTransaction(const QString& refer
     Transaction& transaction = getTransactionParReference(referenceTransaction);
     if(transaction.estFigee())
         throw TransactionException("Une transaction figée ne peut pas être modifiée !");
+    verifierOperationsEtDateTransaction(nouvellesOperations, nouvelleDate);
     annulerTransaction(&transaction);
     try {
         transaction.modifier(nouvelleDate, nouvelIntitule, nouvellesOperations);
