@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "core/ComptabiliteManager.h"
+#include "core/Configuration.h"
 
 namespace Ui {
     class ComptesForm;
@@ -14,6 +15,8 @@ class ComptesForm : public QWidget {
 public:
     explicit ComptesForm(QWidget *parent = nullptr);
     ~ComptesForm();
+    void chargerEtat(Configuration& config);
+    void sauvegarderEtat(Configuration& config) const;
 
 public slots:
     void ajouterChoixCompte(const QString& nomCompte);

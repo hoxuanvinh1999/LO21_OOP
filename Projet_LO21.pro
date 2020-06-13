@@ -11,6 +11,7 @@ SOURCES += \
     core/CompteAbstrait.cpp \
     core/CompteRacine.cpp \
     core/CompteVirtuel.cpp \
+    core/Configuration.cpp \
     core/Operation.cpp \
     core/Transaction.cpp \
     core/TypeCompte.cpp \
@@ -41,6 +42,8 @@ HEADERS += \
     core/CompteException.h \
     core/CompteRacine.h \
     core/CompteVirtuel.h \
+    core/Configuration.h \
+    core/ConfigurationException.h \
     core/ConstReferenceIterator.h \
     core/ConstReferenceIteratorProxy.h \
     core/ISerialisable.h \

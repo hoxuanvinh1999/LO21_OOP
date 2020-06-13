@@ -16,20 +16,20 @@ ComptabiliteManager::ComptabiliteManager(const QString& nomFichier): nomFichier(
 
 void ComptabiliteManager::chargerDonnees() {
     if(!nomFichier.isNull()) {
-        QFile file(nomFichier);
-        if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        QFile fichier(nomFichier);
+        if(!fichier.open(QIODevice::ReadOnly | QIODevice::Text))
             throw SauvegardeException("Erreur de lecture du fichier de sauvegarde !");
         try {
-            QTextStream in(&file);
+            QTextStream in(&fichier);
             in.setCodec(QTextCodec::codecForName("ISO 8859-1"));
             QString content = in.readAll();
             QDomDocument doc;
             doc.setContent(content);
             chargerComptes(doc);
             chargerTransactions(doc);
-            file.close();
+            fichier.close();
         } catch(const exception& e) {
-           file.close();
+            fichier.close();
             throw SauvegardeException("Fichier de sauvegarde corrompu !");
         }
     }
@@ -581,16 +581,16 @@ void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
 void ComptabiliteManager::sauvegarder() {
     if(nomFichier.isNull() || nomFichier.isEmpty())
         throw SauvegardeException("Fichier de sauvegarde non défini !");
-    QFile outFile(nomFichier);
-    if(!outFile.open(QIODevice::WriteOnly))
+    QFile fichier(nomFichier);
+    if(!fichier.open(QIODevice::WriteOnly))
         throw SauvegardeException("Erreur lors de la création du fichier " + nomFichier + " !");
     QDomDocument doc("Comptabilite");
     QDomElement racineDoc = doc.createElement("Comptabilite");
     doc.appendChild(racineDoc);
     sauvegarderComptes(doc, racineDoc);
     sauvegarderTransactions(doc, racineDoc);
-    QTextStream stream(&outFile);
+    QTextStream stream(&fichier);
     stream << doc.toString();
-    outFile.close();
+    fichier.close();
     sauvegarde = true;
 }

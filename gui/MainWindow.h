@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "ComptabiliteForm.h"
+#include "core/Configuration.h"
 
 namespace Ui {
     class MainWindow;
@@ -14,6 +15,8 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void chargerEtat(Configuration& config);
+    void sauvegarderEtat(Configuration& config) const;
 
 private slots:
     void on_actionNouveau_triggered();
@@ -42,11 +45,12 @@ protected slots:
 private:
     Ui::MainWindow* ui;
     ComptabiliteForm* comptabiliteForm = nullptr;
+    void chargerConfiguration();
     bool demanderSauvegarde();
     bool sauvegarder();
     bool sauvegarderEnTantQue();
     bool fermerSessionActuelle();
-    void ouvrirNouvelleSession(const QString& filename = QString());
+    void ouvrirNouvelleSession(const QString& nomFichier = QString());
 };
 
 #endif // MAINWINDOW_H

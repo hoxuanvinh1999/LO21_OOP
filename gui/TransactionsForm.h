@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "core/ComptabiliteManager.h"
+#include "core/Configuration.h"
 
 namespace Ui {
     class TransactionsForm;
@@ -14,6 +15,8 @@ class TransactionsForm : public QWidget {
 public:
     explicit TransactionsForm(QWidget *parent = nullptr);
     ~TransactionsForm();
+    void chargerEtat(Configuration& config);
+    void sauvegarderEtat(Configuration& config) const;
 
 public slots:
     void ajouterChoixTransaction(const QString& referenceTransaction);

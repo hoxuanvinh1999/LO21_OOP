@@ -4,7 +4,6 @@
 #include "CreationCompteDialog.h"
 #include "SuppressionCompteDialog.h"
 #include "core/ComparateurTransaction.h"
-#include <QDebug>
 #include <QMessageBox>
 
 ComptesForm::ComptesForm(QWidget *parent): QWidget(parent), ui(new Ui::ComptesForm), manager(ComptabiliteManager::getInstance()) {
@@ -19,6 +18,17 @@ ComptesForm::ComptesForm(QWidget *parent): QWidget(parent), ui(new Ui::ComptesFo
 
 ComptesForm::~ComptesForm() {
     delete ui;
+}
+
+void ComptesForm::chargerEtat(Configuration& config) {
+    int indexCompte = ui->choixCompte->findText(config.getValeurAttribut("nom_compte_actuel"));
+    if(indexCompte != -1) {
+        ui->choixCompte->setCurrentIndex(indexCompte);
+    }
+}
+
+void ComptesForm::sauvegarderEtat(Configuration& config) const {
+    config.setValeurAttribut("nom_compte_actuel", ui->choixCompte->currentText());
 }
 
 void ComptesForm::definirChoixComptes() {

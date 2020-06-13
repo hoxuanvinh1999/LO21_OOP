@@ -19,6 +19,17 @@ TransactionsForm::~TransactionsForm() {
     delete ui;
 }
 
+void TransactionsForm::chargerEtat(Configuration& config) {
+    int indexTransaction = ui->choixTransaction->findText(config.getValeurAttribut("reference_transaction_actuelle"));
+    if(indexTransaction != -1) {
+        ui->choixTransaction->setCurrentIndex(indexTransaction);
+    }
+}
+
+void TransactionsForm::sauvegarderEtat(Configuration& config) const {
+    config.setValeurAttribut("reference_transaction_actuelle", ui->choixTransaction->currentText());
+}
+
 void TransactionsForm::definirChoixTransactions() {
     ui->choixTransaction->clear();
     for(const Transaction& transaction : manager.getTransactions()) {

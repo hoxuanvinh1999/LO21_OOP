@@ -12,10 +12,32 @@
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    chargerConfiguration();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+void MainWindow::chargerConfiguration() {
+    try {
+        Configuration config = Configuration::chargerFicher("config.xml");
+        chargerEtat(config);
+    } catch(const exception& e) {}
+}
+
+void MainWindow::chargerEtat(Configuration& config) {
+    bool chargementDemarrage = config.getValeurAttribut("chargement_demarrage") == "oui";
+    ui->actionChargementContexteLancement->setChecked(chargementDemarrage);
+    if(chargementDemarrage) {
+        QString fichierComptabilite = config.getValeurAttribut("fichier_comptabilite");
+        if(!fichierComptabilite.isNull() && !fichierComptabilite.isEmpty()) {
+            try {
+                ouvrirNouvelleSession(fichierComptabilite);
+                comptabiliteForm->chargerEtat(config);
+            } catch(const exception& e) {}
+        }
+    }
 }
 
 bool MainWindow::fermerSessionActuelle() {
@@ -34,8 +56,8 @@ bool MainWindow::fermerSessionActuelle() {
     return true;
 }
 
-void MainWindow::ouvrirNouvelleSession(const QString& filename) {
-    ComptabiliteManager::charger(filename);
+void MainWindow::ouvrirNouvelleSession(const QString& nomFichier) {
+    ComptabiliteManager::charger(nomFichier);
     ui->actionSauvegarder->setEnabled(true);
     ui->actionSauvegarderEnTantQue->setEnabled(true);
     ui->actionFermerSession->setEnabled(true);
@@ -151,6 +173,23 @@ void MainWindow::on_actionSauvegarderEnTantQue_triggered() {
 void MainWindow::closeEvent(QCloseEvent* e) {
     if(!demanderSauvegarde()) {
         e->ignore();
+    } else {
+        try {
+            Configuration config;
+            sauvegarderEtat(config);
+            config.sauvegarder("config.xml");
+        } catch(const exception&) {}
+    }
+}
+
+void MainWindow::sauvegarderEtat(Configuration& config) const {
+    bool chargementDemarrage = ui->actionChargementContexteLancement->isChecked();
+    config.setValeurAttribut("chargement_demarrage", chargementDemarrage ? "oui" : "non");
+    if(chargementDemarrage && ComptabiliteManager::estInstancie()) {
+        config.setValeurAttribut("fichier_comptabilite", ComptabiliteManager::getInstance().getNomFichier());
+        if(comptabiliteForm) {
+            comptabiliteForm->sauvegarderEtat(config);
+        }
     }
 }
 
