@@ -6,6 +6,10 @@
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées à la sauvegarde
+ */
+
 class SauvegardeException : public exception {
 private:
     QString message;

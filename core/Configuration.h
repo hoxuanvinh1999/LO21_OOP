@@ -4,6 +4,9 @@
 #include <QHash>
 #include <QString>
 
+/**
+ * @brief The Configuration class
+ */
 class Configuration {
 private:
     QHash<QString, QString> mapAttributs;

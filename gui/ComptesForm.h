@@ -9,6 +9,10 @@ namespace Ui {
     class ComptesForm;
 }
 
+/**
+ * @brief Onglet compte de l'interface graphique
+ */
+
 class ComptesForm : public QWidget {
     Q_OBJECT
 

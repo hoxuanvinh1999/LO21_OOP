@@ -11,12 +11,18 @@
 #include "Transaction.h"
 #include "ConstReferenceIteratorProxy.h"
 
+
+/**
+ * @brief Associe le nom d'un compte à un solde
+ */
 struct CompteSoldeStruct {
     QString nomCompte;
     double solde;
 };
 
-
+/**
+ * @brief Manage les différents comptes
+ */
 class ComptabiliteManager : public QObject {
 
     Q_OBJECT

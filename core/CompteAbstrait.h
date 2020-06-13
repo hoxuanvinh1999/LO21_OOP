@@ -14,6 +14,10 @@ using namespace std;
 
 class CompteRacine;
 
+/**
+ * @brief Implémente les méthodes et les attributs communs à tout types de compte
+ */
+
 class CompteAbstrait : public ISerialisable {
 private:
     QList<CompteAbstrait*> comptesEnfants;

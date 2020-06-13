@@ -11,6 +11,10 @@ namespace Ui {
 class ComptabiliteForm;
 }
 
+/**
+ * @brief Gère la compatibilité de l'interface graphique
+ */
+
 class ComptabiliteForm : public QWidget {
     Q_OBJECT
 

@@ -4,7 +4,9 @@
 #include "CompteAbstrait.h"
 #include "CompteVirtuel.h"
 #include "Compte.h"
-
+/**
+ * @brief Classe du compte racine
+ */
 class CompteRacine : public CompteAbstrait {
 public:
     CompteRacine(): CompteAbstrait("Compte racine", AUCUN) {}

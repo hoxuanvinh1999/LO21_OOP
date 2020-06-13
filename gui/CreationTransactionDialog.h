@@ -9,6 +9,10 @@ namespace Ui {
     class CreationTransactionDialog;
 }
 
+/**
+ * @brief Pop up de la création d'une transaction
+ */
+
 class CreationTransactionDialog : public QDialog {
     Q_OBJECT
 

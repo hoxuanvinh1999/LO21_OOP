@@ -7,6 +7,10 @@
 #include "ReferenceIterator.h"
 #include "ConstReferenceIterator.h"
 
+/**
+ * @brief Modélise une transaction entre des comptes et gère ses opérations
+ */
+
 class Transaction : public ISerialisable {
 private:
     QDate date;

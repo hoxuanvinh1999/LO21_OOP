@@ -6,6 +6,10 @@
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées à une transaction
+ */
+
 class TransactionException : public exception {
 private:
     QString message;

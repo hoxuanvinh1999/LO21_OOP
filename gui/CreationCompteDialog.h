@@ -8,6 +8,10 @@ namespace Ui {
     class CreationCompteDialog;
 }
 
+/**
+ * @brief Pop up de la création d'un compte
+ */
+
 class CreationCompteDialog : public QDialog {
     Q_OBJECT
 

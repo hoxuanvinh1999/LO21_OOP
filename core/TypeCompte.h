@@ -17,6 +17,10 @@ TypeCompte getTypeCompte(const QString& nom);
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées au type d'un compte
+ */
+
 class TypeCompteException : public exception {
 private:
     QString message;

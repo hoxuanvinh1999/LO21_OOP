@@ -5,6 +5,9 @@
 #include "TypeOperation.h"
 #include "Compte.h"
 
+/**
+ * @brief Effectue l'opération sur un compte
+ */
 
 class Operation : public ISerialisable {
 private:

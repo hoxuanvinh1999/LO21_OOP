@@ -8,6 +8,10 @@ namespace Ui {
     class GenerationReleveDialog;
 }
 
+/**
+ * @brief Pop up de la génération du relevé
+ */
+
 class GenerationReleveDialog : public QDialog {
     Q_OBJECT
 

@@ -8,6 +8,10 @@ namespace Ui {
     class CreationCompteCapitauxDialog;
 }
 
+/**
+ * @brief Pop up du choix de compte de capitaux lors de la création d'un compte
+ */
+
 class CreationCompteCapitauxDialog : public QDialog {
     Q_OBJECT
 

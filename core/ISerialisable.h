@@ -3,6 +3,10 @@
 
 #include <QDomElement>
 
+/**
+ * @brief The ISerialisable class
+ */
+
 class ISerialisable {
 public:
     virtual QDomElement serialiser(QDomDocument& doc) const = 0;

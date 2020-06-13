@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées à une instance de Compte
+ */
 class CompteException : public exception {
 private:
     QString message;

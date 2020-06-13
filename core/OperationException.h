@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées à une opération
+ */
 class OperationException : public exception {
 private:
     QString message;

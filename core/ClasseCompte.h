@@ -17,7 +17,9 @@ enum ClasseCompte {
 ClasseCompte getClasseCompte(const QString& nom);
 
 using namespace std;
-
+/**
+ * @brief Gère les exceptions liées à la classe Compte
+ */
 class ClasseCompteException : public exception {
 private:
     QString message;

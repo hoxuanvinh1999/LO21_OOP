@@ -6,6 +6,10 @@
 
 class CompteRacine;
 
+/**
+ * @brief Classe des comptes virtuels (i.e. qui n'ont pas de solde mais peuvent avoir des sous comptes ayant un solde)
+ */
+
 class CompteVirtuel : public CompteAbstrait {
 public:
     CompteVirtuel(const QString& nom, CompteAbstrait* parent);

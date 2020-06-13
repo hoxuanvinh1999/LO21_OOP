@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées à la classe Configuration
+ */
 class ConfigurationException : public exception {
 private:
     QString message;

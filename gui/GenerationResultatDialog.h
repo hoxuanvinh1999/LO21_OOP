@@ -8,6 +8,10 @@ namespace Ui {
     class GenerationResultatDialog;
 }
 
+/**
+ * @brief Pop up de la génération du résultat
+ */
+
 class GenerationResultatDialog : public QDialog {
     Q_OBJECT
 

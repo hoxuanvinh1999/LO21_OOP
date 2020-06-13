@@ -5,6 +5,9 @@
 #include "CompteVirtuel.h"
 #include "CompteRacine.h"
 
+/**
+ * @brief Classe compte
+ */
 class Compte : public CompteAbstrait {
 private:
     double solde;

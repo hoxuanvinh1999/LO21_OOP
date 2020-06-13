@@ -16,6 +16,10 @@ TypeOperation getTypeOperation(const QString& nom);
 
 using namespace std;
 
+/**
+ * @brief Gère les exceptions liées au type d'une opération
+ */
+
 class TypeOperationException : public exception {
 private:
     QString message;

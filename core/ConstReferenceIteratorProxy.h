@@ -4,6 +4,11 @@
 #include "ConstReferenceIterator.h"
 
 template<typename Container>
+
+/**
+ * @brief The ConstReferenceIteratorProxy class
+ */
+
 class ConstReferenceIteratorProxy {
 private:
     const Container container;
