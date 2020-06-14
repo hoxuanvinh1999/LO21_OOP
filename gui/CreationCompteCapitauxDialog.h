@@ -45,7 +45,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de création d'un compte de capitaux.
+     * @brief Interface graphique de la fenêtre de création d'un compte de capitaux.
      */
     Ui::CreationCompteCapitauxDialog *ui;
     /**

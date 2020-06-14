@@ -27,12 +27,10 @@ public:
     CompteVirtuel(const QString& nom, const ClasseCompte& classe, CompteAbstrait* racine);
     /**
      * @brief Débite le compte d'un montant donné.
-     * @param montant Montant à débiter au compte.
      */
     void debiter(double) override { throw CompteException("Un compte virtuel ne peut être débité !"); }
     /**
      * @brief Crédite le compte d'un montant donné.
-     * @param montant Montant à créditer au compte.
      */
     void crediter(double) override { throw CompteException("Un compte virtuel ne peut être crédité !"); }
     /**

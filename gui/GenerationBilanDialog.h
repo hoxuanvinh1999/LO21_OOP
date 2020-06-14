@@ -38,7 +38,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de génération de bilan.
+     * @brief Interface graphique de la fenêtre de génération de bilan.
      */
     Ui::GenerationBilanDialog *ui;
     /**

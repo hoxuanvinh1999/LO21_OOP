@@ -92,7 +92,7 @@ protected slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre principale.
+     * @brief Interface graphique de la fenêtre principale.
      */
     Ui::MainWindow* ui;
     /**

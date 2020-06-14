@@ -4,14 +4,14 @@
 OperationForm::OperationForm(QWidget *parent, bool fermable): QWidget(parent), ui(new Ui::OperationForm), fermable(fermable), manager(ComptabiliteManager::getInstance())  {
     ui->setupUi(this);
     ui->boutonFermer->setEnabled(fermable);
-    ajouterChoixComptes();
+    definirChoixComptes();
 }
 
 OperationForm::~OperationForm() {
     delete ui;
 }
 
-void OperationForm::ajouterChoixComptes() {
+void OperationForm::definirChoixComptes() {
     ui->choixCompte->clear();
     for(const CompteAbstrait& compte : manager.getComptes()) {
         if(compte.getType() == SIMPLE) {

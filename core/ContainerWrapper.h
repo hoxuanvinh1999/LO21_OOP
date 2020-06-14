@@ -21,7 +21,7 @@ public:
     ContainerWrapper() = delete;
     /**
      * @brief Contructeur d'un ContainerWrapper
-     * @param Container à wrapper.
+     * @param container Container à wrapper.
      */
     ContainerWrapper(const Container& container): container(container) {}
     /**

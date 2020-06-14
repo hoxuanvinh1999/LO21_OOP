@@ -41,7 +41,7 @@ public:
 
 private:
     /**
-     * @brief ui Interface graphique du widget de gestion de la comptabilité.
+     * @brief Interface graphique du widget de gestion de la comptabilité.
      */
     Ui::ComptabiliteForm *ui;
     /**

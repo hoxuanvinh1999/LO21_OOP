@@ -45,7 +45,7 @@ private slots:
     void on_checkboxVirtuel_stateChanged(int);
     /**
      * @brief Slot déclenché lors du changement de valeur du spinbox "Montant".
-     * @param Nouvelle valeur du montant.
+     * @param value Nouvelle valeur du montant.
      */
     void on_spinBoxMontant_valueChanged(double value);
     /**
@@ -64,7 +64,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de création d'un compte.
+     * @brief Interface graphique de la fenêtre de création d'un compte.
      */
     Ui::CreationCompteDialog *ui;
     /**

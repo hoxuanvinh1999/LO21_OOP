@@ -73,7 +73,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique d'un widget opération.
+     * @brief Interface graphique d'un widget opération.
      */
     Ui::OperationForm *ui;
     /**

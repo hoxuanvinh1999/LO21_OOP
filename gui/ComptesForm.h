@@ -72,11 +72,11 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique du widget de gestion de comptes.
+     * @brief Interface graphique du widget de gestion des comptes.
      */
     Ui::ComptesForm *ui;
     /**
-     * @brief Gestionnaire de comptabilité de la gestion de comptes.
+     * @brief Gestionnaire de comptabilité de la gestion des comptes.
      */
     ComptabiliteManager& manager;
     /**

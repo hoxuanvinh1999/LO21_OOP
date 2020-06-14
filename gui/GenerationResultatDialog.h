@@ -48,7 +48,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de génération de résultat.
+     * @brief Interface graphique de la fenêtre de génération de résultat.
      */
     Ui::GenerationResultatDialog *ui;
     /**

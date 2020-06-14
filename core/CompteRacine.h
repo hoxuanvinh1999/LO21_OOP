@@ -17,12 +17,10 @@ public:
     CompteRacine(): CompteAbstrait("Compte racine", AUCUN) {}
     /**
      * @brief Débite le compte d'un montant donné.
-     * @param montant Montant à débiter au compte.
      */
     void debiter(double) override { throw CompteException("Un compte racine ne peut être débité !"); }
     /**
      * @brief Crédite le compte d'un montant donné.
-     * @param montant Montant à créditer au compte.
      */
     void crediter(double) override { throw CompteException("Un compte racine ne peut être crédité !"); }
     /**

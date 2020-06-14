@@ -52,7 +52,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de modification d'une transation.
+     * @brief Interface graphique de la fenêtre de modification d'une transation.
      */
     Ui::ModificationTransactionDialog *ui;
     /**

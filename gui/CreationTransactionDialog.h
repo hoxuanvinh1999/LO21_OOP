@@ -47,7 +47,7 @@ private slots:
 
 private:
     /**
-     * @brief ui Interface graphique de la fenêtre de création d'une transaction.
+     * @brief Interface graphique de la fenêtre de création d'une transaction.
      */
     Ui::CreationTransactionDialog *ui;
     /**
