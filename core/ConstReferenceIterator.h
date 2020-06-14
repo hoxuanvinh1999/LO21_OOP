@@ -4,12 +4,13 @@
 #include <type_traits>
 #include "ReferenceIterator.h"
 
-template<typename Container>
+
 
 /**
  * @brief Permet de parcourir (en lecture seule) l'ensemble des comptes et transaction
  */
 
+template<typename Container>
 class ConstReferenceIterator : public Container::const_iterator {
 private:
     using iterator = typename Container::iterator;

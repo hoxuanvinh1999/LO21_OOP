@@ -130,22 +130,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QDateEdit" name="dateDernierRapprochement">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="labelSoldeDernierRapprochement">
        <property name="text">
@@ -167,7 +151,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="labelSoldeDateDonnee">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Solde à la date donnée :&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -175,6 +159,19 @@
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="soldeDateDonnee">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="dateDernierRapprochement">
        <property name="enabled">
         <bool>false</bool>
        </property>

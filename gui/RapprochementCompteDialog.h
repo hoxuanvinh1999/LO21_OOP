@@ -18,6 +18,12 @@ public:
 private slots:
     void on_boutonFermer_clicked();
 
+    void on_choixCompte_currentIndexChanged(int index);
+
+    void on_choixDate_userDateChanged(const QDate &date);
+
+    void on_boutonRapprocher_clicked();
+
 private:
     Ui::RapprochementCompteDialog* ui;
     ComptabiliteManager& manager;

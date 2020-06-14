@@ -3,12 +3,11 @@
 
 #include <type_traits>
 
-template<typename Container>
-
 /**
  * @brief Permet de parcourir (en lecture et en écriture) l'ensemble des comptes et transaction
  */
 
+template<typename Container>
 class ReferenceIterator : public Container::iterator {
 private:
     using iterator =  typename Container::iterator;

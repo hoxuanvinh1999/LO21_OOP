@@ -39,15 +39,15 @@ void GenerationReleveDialog::on_boutonGenerer_clicked() {
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == RECETTE || compteEnfant.getClasse() == DEPENSE) {
-                QList<CompteSoldeStruct> comptesSolde = manager.getSoldesCalculesCompteEtEnfants(compteEnfant.getNom(), [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
+                auto comptesSolde = manager.getSoldesCalculesCompteEtEnfants(compteEnfant.getNom(), [dateDebut, dateFin](const Transaction& transaction) { return transaction.getDate() >= dateDebut && transaction.getDate() <= dateFin; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
                 if(compteEnfant.getClasse() == RECETTE) {
-                    soldeRecettes += comptesSolde.first().solde;
+                    soldeRecettes += (*comptesSolde.begin()).solde;
                     texteComptes = &texteComptesRecettes;
                     texteSoldes = &texteSoldesRecettes;
                 } else {
-                    soldeDepenses += comptesSolde.first().solde;
+                    soldeDepenses += (*comptesSolde.begin()).solde;
                     texteComptes = &texteComptesDepenses;
                     texteSoldes = &texteSoldesDepenses;
                 }

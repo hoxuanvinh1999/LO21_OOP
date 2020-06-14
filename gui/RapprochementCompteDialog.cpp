@@ -1,11 +1,15 @@
 #include "RapprochementCompteDialog.h"
 #include "ui_RapprochementCompteDialog.h"
+#include <QMessageBox>
 
 RapprochementCompteDialog::RapprochementCompteDialog(QWidget *parent): QDialog(parent), ui(new Ui::RapprochementCompteDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-    ui->choixDate->setDate(QDate::currentDate());
     definirChoixComptes();
+    ui->choixDate->setDate(QDate::currentDate());
+    definirInformationsRapprochement();
+    definirChoixDate();
+    definirSoldeDateDonnee();
 }
 
 RapprochementCompteDialog::~RapprochementCompteDialog() {
@@ -21,8 +25,6 @@ void RapprochementCompteDialog::definirChoixComptes() {
     for(const CompteAbstrait& compte : manager.getComptes()) {
         ui->choixCompte->addItem(compte.getNom());
     }
-    definirInformationsRapprochement();
-    definirChoixDate();
 }
 
 void RapprochementCompteDialog::definirChoixDate() {
@@ -34,12 +36,16 @@ void RapprochementCompteDialog::definirChoixDate() {
         if(ui->choixDate->date() < ui->choixDate->minimumDate())
             ui->choixDate->setDate(ui->choixDate->minimumDate());
     }
-    definirSoldeDateDonnee();
 }
 
 void RapprochementCompteDialog::definirInformationsRapprochement() {
     const CompteAbstrait& compte = manager.getCompte(ui->choixCompte->currentText());
-    ui->dateDernierRapprochement->setDate(compte.getDateDernierRapprochement());
+    QDate dateDernierRapprochement = compte.getDateDernierRapprochement();
+    if(!dateDernierRapprochement.isNull() && dateDernierRapprochement.isValid()) {
+        ui->dateDernierRapprochement->setText(dateDernierRapprochement.toString(Qt::LocalDate));
+    } else {
+        ui->dateDernierRapprochement->setText("");
+    }
     ui->soldeDernierRapprochement->setText(QString::number(compte.getSoldeDernierRapprochement(), 'f', 2) + "€");
 }
 
@@ -48,4 +54,25 @@ void RapprochementCompteDialog::definirSoldeDateDonnee() {
     QDate dateRapprochement = ui->choixDate->date();
     double soldeDateDonnee = manager.getSoldeCalculeCompte(nomCompte, [dateRapprochement](const Transaction& transaction) { return transaction.getDate() <= dateRapprochement; });
     ui->soldeDateDonnee->setText(QString::number(soldeDateDonnee, 'f', 2) + "€");
+}
+
+void RapprochementCompteDialog::on_choixCompte_currentIndexChanged(int) {
+    definirInformationsRapprochement();
+    definirChoixDate();
+    definirSoldeDateDonnee();
+}
+
+void RapprochementCompteDialog::on_choixDate_userDateChanged(const QDate&) {
+    definirSoldeDateDonnee();
+}
+
+void RapprochementCompteDialog::on_boutonRapprocher_clicked() {
+    QString nomCompte = ui->choixCompte->currentText();
+    QDate dateRapprochement = ui->choixDate->date();
+    try {
+        manager.rapprocherCompte(nomCompte, dateRapprochement);
+        close();
+    } catch(const CompteException& e) {
+        QMessageBox::critical(this, "Erreur de rapprochement", e.what());
+    }
 }

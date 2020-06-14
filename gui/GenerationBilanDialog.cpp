@@ -35,15 +35,15 @@ void GenerationBilanDialog::on_boutonGenerer_clicked() {
         ComptabiliteManager& manager = ComptabiliteManager::getInstance();
         for(const CompteAbstrait& compteEnfant : manager.getCompteRacine()) {
             if(compteEnfant.getClasse() == ACTIF || compteEnfant.getClasse() == PASSIF) {
-                QList<CompteSoldeStruct> comptesSolde = manager.getSoldesCalculesCompteEtEnfants(compteEnfant.getNom(), [date](const Transaction& transaction) { return transaction.getDate() <= date; });
+                auto comptesSolde = manager.getSoldesCalculesCompteEtEnfants(compteEnfant.getNom(), [date](const Transaction& transaction) { return transaction.getDate() <= date; });
                 stringstream* texteComptes;
                 stringstream* texteSoldes;
                 if(compteEnfant.getClasse() == ACTIF) {
-                    soldeActifs += comptesSolde.first().solde;
+                    soldeActifs += (*comptesSolde.begin()).solde;
                     texteComptes = &texteComptesActifs;
                     texteSoldes = &texteSoldesActifs;
                 } else {
-                    soldePassifs += comptesSolde.first().solde;
+                    soldePassifs += (*comptesSolde.begin()).solde;
                     texteComptes = &texteComptesPassifs;
                     texteSoldes = &texteSoldesPassifs;
                 }

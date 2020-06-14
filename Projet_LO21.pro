@@ -45,8 +45,9 @@ HEADERS += \
     core/CompteVirtuel.h \
     core/Configuration.h \
     core/ConfigurationException.h \
+    core/ConstContainerWrapper.h \
     core/ConstReferenceIterator.h \
-    core/ConstReferenceIteratorProxy.h \
+    core/ContainerWrapper.h \
     core/ISerialisable.h \
     core/Operation.h \
     core/OperationException.h \

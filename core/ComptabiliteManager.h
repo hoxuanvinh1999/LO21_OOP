@@ -9,7 +9,8 @@
 #include "CompteVirtuel.h"
 #include "Compte.h"
 #include "Transaction.h"
-#include "ConstReferenceIteratorProxy.h"
+#include "ConstContainerWrapper.h"
+#include "ContainerWrapper.h"
 
 
 /**
@@ -60,11 +61,15 @@ private:
     void supprimerTransaction(Transaction* transaction);
     Transaction& getTransactionParReference(const QString& referenceTransaction);
     const Transaction& getTransactionParReference(const QString& referenceTransaction) const;
+    QList<Transaction*> getTransactionsCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions);
+    QList<const Transaction*> getTransactionsCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
     double getSoldeCalculeCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
     QList<CompteSoldeStruct> getSoldesCalculesCompteEtEnfants(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const;
+    void rapprocherCompte(CompteAbstrait& compte, const QDate& dateRapprochement);
 public:
-    using comptes_iterator_proxy = ConstReferenceIteratorProxy<QList<CompteAbstrait*>>;
-    using transactions_iterator_proxy = ConstReferenceIteratorProxy<QList<Transaction*>>;
+    using comptes_iterator_proxy = ConstContainerWrapper<QList<const CompteAbstrait*>, ConstReferenceIterator<QList<const CompteAbstrait*>>>;
+    using transactions_iterator_proxy = ConstContainerWrapper<QList<const Transaction*>, ConstReferenceIterator<QList<const Transaction*>>>;
+    using compte_solde_iterator_proxy = ContainerWrapper<QList<CompteSoldeStruct>>;
     ComptabiliteManager() = delete;
     ComptabiliteManager(const ComptabiliteManager&) = delete;
     ComptabiliteManager& operator=(const ComptabiliteManager&) = delete;
@@ -94,8 +99,9 @@ public:
     void supprimerCompte(const QString& nomCompte);
     void supprimerTransaction(const QString& referenceTransaction);
     double getSoldeCalculeCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
-    QList<CompteSoldeStruct> getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
+    compte_solde_iterator_proxy getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions = [](const Transaction&) { return true; }) const;
     void effectuerCloture();
+    void rapprocherCompte(const QString& nomCompte, const QDate& dateRapprochement);
     void sauvegarder(const QString& nomFichier);
     void sauvegarder();
 

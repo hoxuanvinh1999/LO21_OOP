@@ -76,6 +76,8 @@ const Operation& Transaction::getOperation(const QString& nomCompte) const {
 }
 
 void Transaction::modifier(const QDate& nouvelleDate, const QString& nouvelIntitule, const QList<Operation>& nouvellesOperations) {
+    if(figee)
+        throw TransactionException("La transaction est figée et ne peut donc pas être modifiée !");
     if(nouvelleDate.isNull() || !nouvelleDate.isValid())
         throw TransactionException("La date de la transaction ne peut pas être nulle ou invalide !");
     if(nouvelIntitule.isNull() || nouvelIntitule.trimmed().isEmpty())

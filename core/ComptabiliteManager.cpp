@@ -241,6 +241,30 @@ const Transaction& ComptabiliteManager::getTransactionParReference(const QString
     throw TransactionException("Transaction " + referenceTransaction + " inexistante !");
 }
 
+QList<Transaction*> ComptabiliteManager::getTransactionsCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) {
+    QList<Transaction*> transactionsCompte;
+    if(compte.getType() == SIMPLE) {
+        for(Transaction* transaction : this->transactions) {
+            if(transaction->impliqueCompte(compte.getNom()) && filtreurTransactions(*transaction)) {
+                transactionsCompte.append(transaction);
+            }
+        }
+    }
+    return transactionsCompte;
+}
+
+QList<const Transaction*> ComptabiliteManager::getTransactionsCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const {
+    QList<const Transaction*> transactionsCompte;
+    if(compte.getType() == SIMPLE) {
+        for(const Transaction* transaction : this->transactions) {
+            if(transaction->impliqueCompte(compte.getNom()) && filtreurTransactions(*transaction)) {
+                transactionsCompte.append(transaction);
+            }
+        }
+    }
+    return transactionsCompte;
+}
+
 double ComptabiliteManager::getSoldeCalculeCompte(const CompteAbstrait& compte, const function<bool(const Transaction&)>& filtreurTransactions) const {
     double solde = 0;
     if(compte.getType() == SIMPLE) {
@@ -255,6 +279,14 @@ double ComptabiliteManager::getSoldeCalculeCompte(const CompteAbstrait& compte, 
             }
         }
         if(compte.getClasse() == PASSIF || compte.getClasse() == RECETTE) solde *= -1;
+    } else if(compte.getType() == RACINE) {
+        for(const CompteAbstrait& compteEnfant : compte) {
+            if(compteEnfant.getClasse() == ACTIF || compteEnfant.getClasse() == RECETTE) {
+                solde += getSoldeCalculeCompte(compteEnfant, filtreurTransactions);
+            } else {
+                solde -= getSoldeCalculeCompte(compteEnfant, filtreurTransactions);
+            }
+        }
     } else {
         for(const CompteAbstrait& compteEnfant : compte) {
             solde += getSoldeCalculeCompte(compteEnfant, filtreurTransactions);
@@ -268,6 +300,16 @@ QList<CompteSoldeStruct> ComptabiliteManager::getSoldesCalculesCompteEtEnfants(c
     double soldeCompte = 0;
     if(compte.getType() == SIMPLE) {
         soldeCompte = getSoldeCalculeCompte(compte, filtreurTransactions);
+    } else if(compte.getType() == RACINE) {
+        for(const CompteAbstrait& compteEnfant : compte) {
+            QList<CompteSoldeStruct> soldesComptesEnfants = getSoldesCalculesCompteEtEnfants(compteEnfant, filtreurTransactions);
+            if(compte.getClasse() == ACTIF || compte.getClasse() == RECETTE) {
+                soldeCompte += soldesComptesEnfants.first().solde;
+            } else {
+                soldeCompte -= soldesComptesEnfants.first().solde;
+            }
+            soldesComptes.append(soldesComptesEnfants);
+        }
     } else {
         for(const CompteAbstrait& compteEnfant : compte) {
             QList<CompteSoldeStruct> soldesComptesEnfants = getSoldesCalculesCompteEtEnfants(compteEnfant, filtreurTransactions);
@@ -277,6 +319,23 @@ QList<CompteSoldeStruct> ComptabiliteManager::getSoldesCalculesCompteEtEnfants(c
     }
     soldesComptes.push_front({compte.getNom(), soldeCompte});
     return soldesComptes;
+}
+
+void ComptabiliteManager::rapprocherCompte(CompteAbstrait& compte, const QDate& dateRapprochement) {
+    double soldeRapprochement = getSoldeCalculeCompte(compte, [dateRapprochement](const Transaction& transaction) { return transaction.getDate() <= dateRapprochement; });
+    compte.rapprocher(dateRapprochement, soldeRapprochement);
+    if(compte.getType() == SIMPLE) {
+        QList<Transaction*> transactions = getTransactionsCompte(compte, [dateRapprochement](const Transaction& transaction) { return transaction.getDate() <= dateRapprochement && !transaction.estFigee(); });
+        for(Transaction* transaction : transactions) {
+            transaction->figer();
+        }
+    } else {
+        for(CompteAbstrait& compteEnfant : compte) {
+            try {
+                rapprocherCompte(compteEnfant, dateRapprochement);
+            } catch (const exception&) {}
+        }
+    }
 }
 
 ComptabiliteManager& ComptabiliteManager::charger(const QString& nomFichier) {
@@ -315,8 +374,8 @@ QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const QString& nomCompt
 }
 
 ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptes(const function<bool(const CompteAbstrait&)>& filtreurComptes) const {
-    QList<CompteAbstrait*> comptes;
-    for(CompteAbstrait* compte : this->comptes) {
+    QList<const CompteAbstrait*> comptes;
+    for(const CompteAbstrait* compte : this->comptes) {
         if(filtreurComptes(*compte)) {
             comptes.append(compte);
         }
@@ -338,8 +397,8 @@ bool ComptabiliteManager::existeTransaction(const QString& referenceTransaction)
 }
 
 ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactions(const function<bool(const Transaction&)>& filtreurTransactions) const {
-    QList<Transaction*> transactions;
-    for(Transaction* transaction : this->transactions) {
+    QList<const Transaction*> transactions;
+    for(const Transaction* transaction : this->transactions) {
         if(filtreurTransactions(*transaction)){
             transactions.append(transaction);
         }
@@ -349,13 +408,7 @@ ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransac
 
 ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
     const CompteAbstrait& compte = getCompteParNom(nomCompte);
-    QList<Transaction*> transactionsCompte;
-    for(Transaction* transaction : this->transactions) {
-        if(transaction->impliqueCompte(compte.getNom()) && filtreurTransactions(*transaction)) {
-            transactionsCompte.append(transaction);
-        }
-    }
-    return transactionsCompte;
+    return getTransactionsCompte(compte, filtreurTransactions);
 }
 
 const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, bool virtuel) {
@@ -498,7 +551,7 @@ double ComptabiliteManager::getSoldeCalculeCompte(const QString& nomCompte, cons
     return getSoldeCalculeCompte(compte, filtreurTransactions);
 }
 
-QList<CompteSoldeStruct> ComptabiliteManager::getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
+ComptabiliteManager::compte_solde_iterator_proxy ComptabiliteManager::getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
     const CompteAbstrait& compte = getCompte(nomCompte);
     return getSoldesCalculesCompteEtEnfants(compte, filtreurTransactions);
 }
@@ -573,6 +626,11 @@ void ComptabiliteManager::effectuerCloture() {
         operationsDeficit.append(Operation(soldeResultat, DEBIT, "Déficit"));
         ajouterTransaction(QDate::currentDate(), "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation perte", operationsDeficit);
     }
+}
+
+void ComptabiliteManager::rapprocherCompte(const QString& nomCompte, const QDate& dateRapprochement) {
+    CompteAbstrait& compte = getCompteParNom(nomCompte);
+    rapprocherCompte(compte, dateRapprochement);
 }
 
 void ComptabiliteManager::sauvegarder(const QString& nomFichier) {
