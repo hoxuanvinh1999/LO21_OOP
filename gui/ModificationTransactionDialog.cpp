@@ -8,7 +8,7 @@ ModificationTransactionDialog::ModificationTransactionDialog(QWidget *parent): Q
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     ui->layoutOperations->setAlignment(Qt::AlignCenter);
     definirChoixTransactions();
-    updateAffichageTransaction();
+    definirAffichageTransaction();
     definirEtatBoutonAjoutOperation();
 }
 
@@ -25,7 +25,7 @@ void ModificationTransactionDialog::definirChoixTransactions() {
     }
 }
 
-void ModificationTransactionDialog::updateAffichageTransaction() {
+void ModificationTransactionDialog::definirAffichageTransaction() {
     for(OperationForm* operationForm : operationsForms) {
         delete operationForm;
     }
@@ -65,7 +65,7 @@ void ModificationTransactionDialog::on_boutonFermer_clicked() {
 }
 
 void ModificationTransactionDialog::on_choixTransaction_currentIndexChanged(int) {
-    updateAffichageTransaction();
+    definirAffichageTransaction();
 }
 
 void ModificationTransactionDialog::on_boutonAjouterOperation_clicked() {

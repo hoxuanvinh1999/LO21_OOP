@@ -1,5 +1,6 @@
 #include "Transaction.h"
 #include "TransactionException.h"
+#include <QSet>
 
 Transaction::Transaction(const QDate& date, const QString& reference, const QString& intitule, const QList<Operation>& operations): date(date), reference(reference), intitule(intitule), figee(false) {
     if(date.isNull() || !date.isValid())

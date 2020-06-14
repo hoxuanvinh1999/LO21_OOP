@@ -36,7 +36,6 @@ SOURCES += \
 
 HEADERS += \
     core/ClasseCompte.h \
-    core/ComparateurTransaction.h \
     core/ComptabiliteManager.h \
     core/Compte.h \
     core/CompteAbstrait.h \

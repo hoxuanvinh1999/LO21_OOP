@@ -141,11 +141,11 @@ const CompteAbstrait& ComptabiliteManager::getCompteParNom(const QString& nomCom
     throw CompteException("Compte " + nomCompte + " inexistant !");
 }
 
-QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const CompteAbstrait* compte) const {
-    QSet<QString> nomComptes;
-    nomComptes.insert(compte->getNom());
+QList<QString> ComptabiliteManager::getNomCompteEtEnfants(const CompteAbstrait* compte) const {
+    QList<QString> nomComptes;
+    nomComptes.append(compte->getNom());
     for(const CompteAbstrait& compteEnfant : *compte) {
-        nomComptes.unite(getNomCompteEtEnfants(&compteEnfant));
+        nomComptes.append(getNomCompteEtEnfants(&compteEnfant));
     }
     return nomComptes;
 }
@@ -368,12 +368,12 @@ bool ComptabiliteManager::existeCompte(const QString& nomCompte) const {
     return false;
 }
 
-QSet<QString> ComptabiliteManager::getNomCompteEtEnfants(const QString& nomCompte) const {
+ComptabiliteManager::noms_comptes_wrapper ComptabiliteManager::getNomCompteEtEnfants(const QString& nomCompte) const {
     const CompteAbstrait& compte = getCompteParNom(nomCompte);
     return getNomCompteEtEnfants(&compte);
 }
 
-ComptabiliteManager::comptes_iterator_proxy ComptabiliteManager::getComptes(const function<bool(const CompteAbstrait&)>& filtreurComptes) const {
+ComptabiliteManager::comptes_wrapper ComptabiliteManager::getComptes(const function<bool(const CompteAbstrait&)>& filtreurComptes) const {
     QList<const CompteAbstrait*> comptes;
     for(const CompteAbstrait* compte : this->comptes) {
         if(filtreurComptes(*compte)) {
@@ -396,7 +396,7 @@ bool ComptabiliteManager::existeTransaction(const QString& referenceTransaction)
     return false;
 }
 
-ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactions(const function<bool(const Transaction&)>& filtreurTransactions) const {
+ComptabiliteManager::transactions_wrapper ComptabiliteManager::getTransactions(const function<bool(const Transaction&)>& filtreurTransactions) const {
     QList<const Transaction*> transactions;
     for(const Transaction* transaction : this->transactions) {
         if(filtreurTransactions(*transaction)){
@@ -406,7 +406,7 @@ ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransac
     return transactions;
 }
 
-ComptabiliteManager::transactions_iterator_proxy ComptabiliteManager::getTransactionsCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
+ComptabiliteManager::transactions_wrapper ComptabiliteManager::getTransactionsCompte(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
     const CompteAbstrait& compte = getCompteParNom(nomCompte);
     return getTransactionsCompte(compte, filtreurTransactions);
 }
@@ -438,11 +438,13 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, con
     return *compte;
 }
 
-const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, double soldeInitial, const QString& nomCompteCapitaux) {
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const ClasseCompte& classe, double soldeInitial, const QDate& dateSoldeInitial, const QString& nomCompteCapitaux) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
     if(classe != ACTIF && classe != PASSIF)
         throw CompteException("Un compte avec un solde initial doit être un compte de passifs et d'actifs !");
+    if(dateSoldeInitial.isNull() || !dateSoldeInitial.isValid())
+        throw CompteException("La date du solde initial du compte doit être valide !");
     CompteAbstrait& compteCapitaux = getCompteParNom(nomCompteCapitaux);
     if(compteCapitaux.getType() != SIMPLE || compteCapitaux.getClasse() != PASSIF)
         throw CompteException("Un compte de capitaux doit être un compte de passifs !");
@@ -458,17 +460,19 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, con
         operations.append(Operation(soldeInitial, CREDIT, nom));
         operations.append(Operation(soldeInitial, DEBIT, nomCompteCapitaux));
     }
-    Transaction* transaction = new Transaction(QDate::currentDate(), "I" + QString::number(i), "Solde initial", operations);
+    Transaction* transaction = new Transaction(dateSoldeInitial, "I" + QString::number(i), "Solde initial", operations);
     ajouterTransaction(transaction);
     return *compte;
 }
 
-const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, double soldeInitial, const QString& nomCompteCapitaux) {
+const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, const QString& nomParent, double soldeInitial, const QDate& dateSoldeInitial, const QString& nomCompteCapitaux) {
     if(existeCompte(nom))
         throw CompteException("Nom de compte " + nom + " déjà utilisé !");
     CompteAbstrait& compteParent = getCompteParNom(nomParent);
     if(compteParent.getClasse() != ACTIF && compteParent.getClasse() != PASSIF)
         throw CompteException("Un compte avec un solde initial doit être un compte de passifs et d'actifs !");
+    if(dateSoldeInitial.isNull() || !dateSoldeInitial.isValid())
+        throw CompteException("La date du solde initial du compte doit être valide !");
     CompteAbstrait& compteCapitaux = getCompteParNom(nomCompteCapitaux);
     if(compteCapitaux.getType() != SIMPLE || compteCapitaux.getClasse() != PASSIF)
         throw CompteException("Un compte de capitaux doit être un compte de passifs !");
@@ -484,7 +488,7 @@ const CompteAbstrait& ComptabiliteManager::ajouterCompte(const QString& nom, con
         operations.append(Operation(soldeInitial, CREDIT, nom));
         operations.append(Operation(soldeInitial, DEBIT, nomCompteCapitaux));
     }
-    Transaction* transaction = new Transaction(QDate::currentDate(), "I" + QString::number(i), "Solde initial", operations);
+    Transaction* transaction = new Transaction(dateSoldeInitial, "I" + QString::number(i), "Solde initial", operations);
     ajouterTransaction(transaction);
     return *compte;
 }
@@ -551,7 +555,7 @@ double ComptabiliteManager::getSoldeCalculeCompte(const QString& nomCompte, cons
     return getSoldeCalculeCompte(compte, filtreurTransactions);
 }
 
-ComptabiliteManager::compte_solde_iterator_proxy ComptabiliteManager::getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
+ComptabiliteManager::comptes_soldes_wrapper ComptabiliteManager::getSoldesCalculesCompteEtEnfants(const QString& nomCompte, const function<bool(const Transaction&)>& filtreurTransactions) const {
     const CompteAbstrait& compte = getCompte(nomCompte);
     return getSoldesCalculesCompteEtEnfants(compte, filtreurTransactions);
 }

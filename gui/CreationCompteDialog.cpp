@@ -7,9 +7,10 @@
 CreationCompteDialog::CreationCompteDialog(QWidget *parent): QDialog(parent), ui(new Ui::CreationCompteDialog), manager(ComptabiliteManager::getInstance()) {
     ui->setupUi(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    ui->choixDateSoldeInitial->setDate(QDate::currentDate());
     initialiserChoixComptes();
-    updateChoixClasse();
-    updateGroupeSoldeInitial();
+    definirEtatChoixClasse();
+    definirEtatGroupeSoldeInitial();
 }
 
 CreationCompteDialog::~CreationCompteDialog() {
@@ -30,7 +31,7 @@ void CreationCompteDialog::on_boutonFermer_clicked() {
     close();
 }
 
-void CreationCompteDialog::updateGroupeSoldeInitial() {
+void CreationCompteDialog::definirEtatGroupeSoldeInitial() {
     bool estVirtuel = ui->checkboxVirtuel->isChecked();
     ClasseCompte classe = getClasseCompte(ui->choixClasse->currentText());
     bool afficher;
@@ -43,7 +44,7 @@ void CreationCompteDialog::updateGroupeSoldeInitial() {
     ui->groupSoldeInitial->setEnabled(afficher);
 }
 
-void CreationCompteDialog::updateChoixClasse() {
+void CreationCompteDialog::definirEtatChoixClasse() {
     QString nomParent = ui->choixCompteParent->currentText();
     bool enfantRacine = manager.getCompteRacine().getNom() == nomParent;
     ui->labelClasse->setEnabled(enfantRacine);
@@ -51,12 +52,12 @@ void CreationCompteDialog::updateChoixClasse() {
 }
 
 void CreationCompteDialog::on_checkboxVirtuel_stateChanged(int) {
-    updateGroupeSoldeInitial();
+    definirEtatGroupeSoldeInitial();
 }
 
 void CreationCompteDialog::on_choixCompteParent_currentIndexChanged(int) {
-    updateChoixClasse();
-    updateGroupeSoldeInitial();
+    definirEtatChoixClasse();
+    definirEtatGroupeSoldeInitial();
 }
 
 void CreationCompteDialog::on_spinBoxMontant_valueChanged(double value) {
@@ -75,12 +76,13 @@ void CreationCompteDialog::on_boutonCreer_clicked() {
                 return;
             }
             double soldeInitial = ui->spinBoxMontant->value();
+            QDate dateSoldeInitial = ui->choixDateSoldeInitial->date();
             if(ui->choixClasse->isEnabled()) {
                 ClasseCompte classeCompte = getClasseCompte(ui->choixClasse->currentText());
-                manager.ajouterCompte(nomCompte, classeCompte, soldeInitial, nomCompteCapitaux);
+                manager.ajouterCompte(nomCompte, classeCompte, soldeInitial, dateSoldeInitial, nomCompteCapitaux);
             } else {
                 QString nomParent = ui->choixCompteParent->currentText();
-                manager.ajouterCompte(nomCompte, nomParent, soldeInitial, nomCompteCapitaux);
+                manager.ajouterCompte(nomCompte, nomParent, soldeInitial, dateSoldeInitial, nomCompteCapitaux);
             }
         } else {
             bool virtuel = ui->checkboxVirtuel->isChecked();
@@ -99,7 +101,7 @@ void CreationCompteDialog::on_boutonCreer_clicked() {
 }
 
 void CreationCompteDialog::on_choixClasse_currentIndexChanged(int) {
-    updateGroupeSoldeInitial();
+    definirEtatGroupeSoldeInitial();
 }
 
 void CreationCompteDialog::on_boutonAjouterCompteCapitaux_clicked() {

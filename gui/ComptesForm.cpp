@@ -4,7 +4,6 @@
 #include "CreationCompteDialog.h"
 #include "SuppressionCompteDialog.h"
 #include "RapprochementCompteDialog.h"
-#include "core/ComparateurTransaction.h"
 #include <QMessageBox>
 
 ComptesForm::ComptesForm(QWidget *parent): QWidget(parent), ui(new Ui::ComptesForm), manager(ComptabiliteManager::getInstance()) {
@@ -47,17 +46,18 @@ void ComptesForm::definirSolde() {
 void ComptesForm::chargerTable() {
     ui->tableTransactionsCompte->model()->removeRows(0, ui->tableTransactionsCompte->rowCount());
     QString nomCompte = ui->choixCompte->currentText();
-    QSet<QString> nomComptes = manager.getNomCompteEtEnfants(nomCompte);
+    auto itNomsComptes = manager.getNomCompteEtEnfants(nomCompte);
+    QSet<QString> nomComptes(itNomsComptes.begin(), itNomsComptes.end());
     QList<const Transaction*> transactions;
     for(const Transaction& transaction : manager.getTransactions()) {
-        for(QString nom : nomComptes) {
+        for(const QString& nom : nomComptes) {
             if(transaction.impliqueCompte(nom)) {
                 transactions.append(&transaction);
                 break;
             }
         }
     }
-    std::stable_sort(transactions.begin(), transactions.end(), transactionsComparaisonPlusPetit);
+    std::stable_sort(transactions.begin(), transactions.end(), [](const Transaction* a, const Transaction* b) { return a->getDate() < b->getDate(); });
     bool estRacine = nomCompte == manager.getCompteRacine().getNom();
     int i = 0;
     double solde = 0;
