@@ -561,15 +561,7 @@ ComptabiliteManager::comptes_soldes_wrapper ComptabiliteManager::getSoldesCalcul
 }
 
 void ComptabiliteManager::effectuerCloture() {
-    if(!existeCompte("Résultat")) {
-        ajouterCompte("Résultat", PASSIF, false);
-    }
-    if(!existeCompte("Excédent")) {
-        ajouterCompte("Excédent", PASSIF, false);
-    }
-    if(!existeCompte("Déficit")) {
-        ajouterCompte("Déficit", PASSIF, false);
-    }
+    QDate dateCloture = QDate::currentDate();
     double soldeDepenses = 0;
     double soldeRecettes = 0;
     QList<Operation> operationsDepenses;
@@ -578,6 +570,7 @@ void ComptabiliteManager::effectuerCloture() {
         if(compte->getType() == SIMPLE && (compte->getClasse() == DEPENSE || compte->getClasse() == RECETTE)) {
             double soldeCompte = compte->getSolde();
             if(soldeCompte != 0) {
+                if(compte->getDateDernierRapprochement() > dateCloture) dateCloture = compte->getDateDernierRapprochement();
                 if(compte->getClasse() == DEPENSE) {
                     soldeDepenses += soldeCompte;
                     if(soldeCompte > 0) {
@@ -598,6 +591,15 @@ void ComptabiliteManager::effectuerCloture() {
     }
     if(operationsDepenses.size() + operationsRecettes.size() == 0)
         throw TransactionException("Aucune opérations et transactions nécessaires pour la clôture !");
+    if(!existeCompte("Résultat")) {
+        ajouterCompte("Résultat", PASSIF, false);
+    }
+    if(!existeCompte("Excédent")) {
+        ajouterCompte("Excédent", PASSIF, false);
+    }
+    if(!existeCompte("Déficit")) {
+        ajouterCompte("Déficit", PASSIF, false);
+    }
     int i = 1;
     while(existeTransaction("CL" + QString::number(i) + "D") && existeTransaction("CL" + QString::number(i) + "R")) ++i;
     if(operationsDepenses.size() > 0) {
@@ -606,7 +608,7 @@ void ComptabiliteManager::effectuerCloture() {
         } else {
             operationsDepenses.append(Operation(soldeDepenses, CREDIT, "Résultat"));
         }
-        ajouterTransaction(QDate::currentDate(), "CL" + QString::number(i) + "D", "Clôture " + QString::number(i) + " - dépenses", operationsDepenses);
+        ajouterTransaction(dateCloture, "CL" + QString::number(i) + "D", "Clôture " + QString::number(i) + " - dépenses", operationsDepenses);
     }
     if(operationsRecettes.size() > 0) {
         if(soldeRecettes >= 0) {
@@ -614,7 +616,7 @@ void ComptabiliteManager::effectuerCloture() {
         } else {
             operationsRecettes.append(Operation(soldeRecettes, DEBIT, "Résultat"));
         }
-        ajouterTransaction(QDate::currentDate(), "CL" + QString::number(i) + "R", "Clôture " + QString::number(i) + " - recettes", operationsRecettes);
+        ajouterTransaction(dateCloture, "CL" + QString::number(i) + "R", "Clôture " + QString::number(i) + " - recettes", operationsRecettes);
     }
     const CompteAbstrait& compteResultat = getCompteParNom("Résultat");
     double soldeResultat = compteResultat.getSolde();
@@ -622,13 +624,13 @@ void ComptabiliteManager::effectuerCloture() {
         QList<Operation> operationsBenefices;
         operationsBenefices.append(Operation(soldeResultat, DEBIT, "Résultat"));
         operationsBenefices.append(Operation(soldeResultat, CREDIT, "Excédent"));
-        ajouterTransaction(QDate::currentDate(), "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation bénéfice", operationsBenefices);
+        ajouterTransaction(dateCloture, "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation bénéfice", operationsBenefices);
     } else if(soldeResultat < 0) {
         soldeResultat *= -1;
         QList<Operation> operationsDeficit;
         operationsDeficit.append(Operation(soldeResultat, CREDIT, "Résultat"));
         operationsDeficit.append(Operation(soldeResultat, DEBIT, "Déficit"));
-        ajouterTransaction(QDate::currentDate(), "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation perte", operationsDeficit);
+        ajouterTransaction(dateCloture, "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation perte", operationsDeficit);
     }
 }
 
