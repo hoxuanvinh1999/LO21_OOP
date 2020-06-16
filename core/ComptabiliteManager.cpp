@@ -583,7 +583,7 @@ void ComptabiliteManager::effectuerCloture() {
                     if(soldeCompte > 0) {
                         operationsRecettes.append(Operation(soldeCompte, DEBIT, compte->getNom()));
                     } else {
-                        operationsRecettes.append(Operation(soldeCompte, CREDIT, compte->getNom()));
+                        operationsRecettes.append(Operation(-soldeCompte, CREDIT, compte->getNom()));
                     }
                 }
             }
