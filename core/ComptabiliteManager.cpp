@@ -606,7 +606,7 @@ void ComptabiliteManager::effectuerCloture() {
         if(soldeDepenses >= 0) {
             operationsDepenses.append(Operation(soldeDepenses, DEBIT, "Résultat"));
         } else {
-            operationsDepenses.append(Operation(soldeDepenses, CREDIT, "Résultat"));
+            operationsDepenses.append(Operation(-soldeDepenses, CREDIT, "Résultat"));
         }
         ajouterTransaction(dateCloture, "CL" + QString::number(i) + "D", "Clôture " + QString::number(i) + " - dépenses", operationsDepenses);
     }
@@ -614,7 +614,7 @@ void ComptabiliteManager::effectuerCloture() {
         if(soldeRecettes >= 0) {
             operationsRecettes.append(Operation(soldeRecettes, CREDIT, "Résultat"));
         } else {
-            operationsRecettes.append(Operation(soldeRecettes, DEBIT, "Résultat"));
+            operationsRecettes.append(Operation(-soldeRecettes, DEBIT, "Résultat"));
         }
         ajouterTransaction(dateCloture, "CL" + QString::number(i) + "R", "Clôture " + QString::number(i) + " - recettes", operationsRecettes);
     }
@@ -626,10 +626,9 @@ void ComptabiliteManager::effectuerCloture() {
         operationsBenefices.append(Operation(soldeResultat, CREDIT, "Excédent"));
         ajouterTransaction(dateCloture, "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation bénéfice", operationsBenefices);
     } else if(soldeResultat < 0) {
-        soldeResultat *= -1;
         QList<Operation> operationsDeficit;
-        operationsDeficit.append(Operation(soldeResultat, CREDIT, "Résultat"));
-        operationsDeficit.append(Operation(soldeResultat, DEBIT, "Déficit"));
+        operationsDeficit.append(Operation(-soldeResultat, CREDIT, "Résultat"));
+        operationsDeficit.append(Operation(-soldeResultat, DEBIT, "Déficit"));
         ajouterTransaction(dateCloture, "AFF" + QString::number(i), "Clôture " + QString::number(i) + " - affectation perte", operationsDeficit);
     }
 }
