@@ -1,4 +1,3 @@
-#include <QDebug>
 #include "CompteAbstrait.h"
 #include "CompteException.h"
 #include "CompteRacine.h"
@@ -9,7 +8,6 @@ CompteAbstrait::CompteAbstrait(const QString& nom, const ClasseCompte& classe, C
     if(parent) {
         parent->comptesEnfants.append(this);
     }
-    qDebug() << "Construction du compte " << nom;
 }
 
 CompteAbstrait::~CompteAbstrait() {
@@ -20,7 +18,6 @@ CompteAbstrait::~CompteAbstrait() {
         compteEnfant->parent = nullptr;
         delete compteEnfant;
     }
-    qDebug() << "Destruction du compte " << nom;
 }
 
 void CompteAbstrait::rapprocher(const QDate& dateRapprochement, double soldeRapprochement) {
