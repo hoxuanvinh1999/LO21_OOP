@@ -10,7 +10,7 @@
 #include "CompteVirtuel.h"
 #include "Compte.h"
 #include "Transaction.h"
-#include "ConstContainerWrapper.h"
+#include "ReferenceIterator.h"
 #include "ContainerWrapper.h"
 
 using namespace std;
@@ -235,12 +235,12 @@ public:
      * @typedef comptes_wrapper
      * @brief Wrapper d'une liste de pointeurs de comptes constants.
      */
-    using comptes_wrapper = ConstContainerWrapper<QList<const CompteAbstrait*>, ConstReferenceIterator<QList<const CompteAbstrait*>>>;
+    using comptes_wrapper = ContainerWrapper<QList<const CompteAbstrait*>, reference_iterator<QList<const CompteAbstrait*>::iterator>>;
     /**
      * @typedef transactions_wrapper
      * @brief Wrapper d'une liste de pointeurs de transactions constantes.
      */
-    using transactions_wrapper = ConstContainerWrapper<QList<const Transaction*>, ConstReferenceIterator<QList<const Transaction*>>>;
+    using transactions_wrapper = ContainerWrapper<QList<const Transaction*>, reference_iterator<QList<const Transaction*>::iterator>>;
     /**
      * @typedef comptes_soldes_wrapper
      * @brief Wrapper d'une liste de structures compte <-> solde

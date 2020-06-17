@@ -8,7 +8,6 @@
 #include "ClasseCompte.h"
 #include "TypeCompte.h"
 #include "ReferenceIterator.h"
-#include "ConstReferenceIterator.h"
 
 class CompteRacine;
 
@@ -47,12 +46,12 @@ public:
      * @typedef iterator
      * @brief Itérateur sur les comptes enfants du compte.
      */
-    using iterator = ReferenceIterator<QList<CompteAbstrait*>>;
+    using iterator = reference_iterator<QList<CompteAbstrait*>::iterator>;
     /**
      * @typedef const_iterator
      * @brief Itérateur sur les comptes enfants constants du compte.
      */
-    using const_iterator = ConstReferenceIterator<QList<CompteAbstrait*>>;
+    using const_iterator = reference_iterator<QList<CompteAbstrait*>::const_iterator>;
     /**
      * @brief Récupère l'itérateur du début de parcours des comptes enfants du compte.
      * @return L'itérateur du début de parcours des comptes enfants du compte.

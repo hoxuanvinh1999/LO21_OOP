@@ -9,7 +9,7 @@ template<typename Container, typename Iter = typename Container::iterator>
 class ContainerWrapper {
 private:
     /**
-     * @brief Container wrappé par le wrapper.
+     * @brief Container constant wrappé par le wrapper.
      */
     Container container;
 public:

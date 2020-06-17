@@ -5,7 +5,6 @@
 #include <QDate>
 #include "Operation.h"
 #include "ReferenceIterator.h"
-#include "ConstReferenceIterator.h"
 
 /**
  * @class Transaction
@@ -52,12 +51,12 @@ public:
      * @typedef iterator
      * @brief Itérateur sur les opérations de la transaction.
      */
-    using iterator = ReferenceIterator<QList<Operation*>>;
+    using iterator = reference_iterator<QList<Operation*>::iterator>;
     /**
      * @typedef const_iterator
      * @brief Itérateur sur les opérations constantes de la transaction.
      */
-    using const_iterator = ConstReferenceIterator<QList<Operation*>>;
+    using const_iterator = reference_iterator<QList<Operation*>::const_iterator>;
     /**
      * @brief Récupère l'itérateur du début de parcours des opérations de la transaction.
      * @return L'itérateur du début de parcours des opérations de la transaction.
