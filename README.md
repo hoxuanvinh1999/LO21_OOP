@@ -8,7 +8,9 @@ Video of the project's results [Here](https://youtu.be/vLR5NvTTAHc)
 
 ## Photo
 
-
+![alt text](images/1.png)  
+![alt text](images/2.png)  
+![alt text](images/3.png)  
 
 ## Contributeurs  
 
